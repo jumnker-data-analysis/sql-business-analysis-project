@@ -1,0 +1,375 @@
+-- Day 8 Question 1
+-- Find all orders where 'order_amount' is higher
+-- than the average order amount.
+
+select *
+from orders o
+where order_amount > (
+    select avg(order_amount)
+    from orders
+)
+;
+
+-- Day 8 Question 2
+-- Find completed orders where 'order_amount' is higher
+-- than the average completed order amount.
+
+select *
+from orders
+where order_amount > (
+    select avg(order_amount)
+    from orders
+    where order_status = 'completed'
+)
+and order_status = 'completed'
+;
+
+-- Day 8 Question 3
+-- Find all employees whose salary is higher
+-- than the average salary.
+
+select *
+from employees
+where salary > (
+    select avg(salary)
+    from employees
+)
+;
+
+-- Day 8 Question 4
+-- Find all employees whose salary is higher than 
+-- the average salary of all employees in their dapartment.
+
+select *
+from employees e
+where salary > (
+    select avg(salary)
+    from employees
+    where department_id= e.department_id
+)
+;
+
+-- Day 8 Question 5
+-- Find orders handled by employees who work in the
+-- Sales department.
+
+select count(order_id) as o_hld_dep 
+from orders o 
+join employees e
+    on e.employee_id = o.employee_id
+where department_id = (
+    select department_id 
+    from departments 
+    where department_name = 'Sales'
+)
+;
+
+
+-- Day 8 Question 6
+-- Find departments that have at least one employee handling
+-- completed orders.
+
+select distinct department_name 
+from orders o
+join employees e
+    on e.employee_id = o.employee_id
+join departments d
+    on d.department_id = e.department_id
+where order_status = 'completed'
+;
+
+-- Day 8 Question 7
+-- Find employees who handled at least one order above 300.
+select e.employee_id,
+(first_name||' '||last_name) as full_name
+from employees e
+where e.employee_id in (
+    select distinct o.employee_id 
+    from orders o
+    where order_amount > 300
+)
+;
+
+-- Day 8 Question 8
+-- Business question: Which employees are handling unusually
+-- high-value orders?
+
+
+select o.employee_id,
+e.first_name||' '||e.last_name as full_name,
+d.department_name,
+count(*) as high_value_orders,
+sum(o.order_amount) as high_value_revenue
+from orders o 
+join employees e
+    on o.employee_id = e.employee_id
+join departments d 
+    on e.department_id = d.department_id
+where o.order_amount > (
+    select avg(order_amount)
+    from orders
+)
+group by d.department_name, o.employee_id, full_name
+order by high_value_revenue desc
+;
+
+-- Day 9 Question 1
+-- Find employees whose salary is higher than the average salary
+-- in their own department.
+
+select e.employee_id,
+e.first_name||' '||e.last_name as full_name,
+e.department_id
+from employees e
+where e.salary > (
+    select avg(salary)
+    from employees
+    where department_id= e.department_id
+)
+;
+
+-- Day 9 Question 2
+-- Find orders where the amount is higher than the average order 
+-- amount for that same employees
+
+select o.order_id,
+o.order_amount,
+o.employee_id
+from orders o
+where o.order_amount > (
+    select avg(order_amount)
+    from orders
+    where employee_id = o.employee_id
+)
+;
+
+
+-- Day 9 Question 3
+-- Find departments where average salary is higher than the 
+-- company-wide average salary.
+
+select d.department_name,
+avg(e.salary) as avg_sal_dep
+from employees e
+join departments d
+    on e.department_id = d.department_id
+group by d.department_name
+having avg(e.salary) >
+(
+select avg(salary) 
+from employees
+)
+;
+
+
+-- Day 9 Question 4
+-- Find employees whose total completed revenue is above the average
+-- completed revenue per employee.
+
+
+select 
+employee_id,
+sum(order_amount) as ttl_com_emp_out
+from orders o
+where order_status = 'completed'
+group by employee_id
+having sum(order_amount) > 
+(
+    select avg(ttl_com_emp)
+    from
+    (
+        select employee_id, 
+        sum(order_amount) as ttl_com_emp
+        from orders
+        where order_status = 'completed'
+        group by employee_id
+    ) as ttl_com_emps
+)
+
+-- Day 9 Question 5
+-- Find each employee's highest order.
+select o.employee_id, 
+o.order_id, 
+o.order_amount
+from orders o 
+where (o.employee_id, o.order_amount) in  
+(
+    select employee_id, max(order_amount)
+    from orders
+    group by employee_id
+    order by employee_id
+)
+order by employee_id
+;
+-- Day 9 Question 6
+-- Find customers whose spending is higher than the average customer spending.
+
+select 
+o.customer_name,
+sum(o.order_amount) as customer_spending
+from orders o
+group by customer_name
+having sum(o.order_amount) > 
+(
+    select avg(customer_total)
+    from
+    (
+        select customer_name, 
+        sum(order_amount) as customer_total
+        from orders
+        group by customer_name
+    ) as customer_totals
+)
+
+
+-- Day 9 Question 7
+-- Find payment methods where total completed revenue is above the
+-- average revenue by payment method.
+
+select 
+o.payment_method,
+sum(o.order_amount) as per_method_total_out
+from orders o
+group by o.payment_method
+having sum(o.order_amount) >
+(
+    select avg(per_method_total)
+    from
+    (
+        select 
+        payment_method,
+        sum(order_amount) as per_method_total
+        from orders
+        where order_status = 'completed'
+        group by payment_method
+    ) as per_method_totals
+)
+
+-- Day 9 Question 8
+-- Business question: Which employees outperform their department
+-- or peer group.
+
+select e.department_id, avg(salary)
+from orders o 
+left join employees e 
+on o.employee_id = e.employee_id
+where 
+group by e.department_id
+
+
+-- Day 10 Question 1
+-- Categorize orders by value:
+-- Low: below 100
+-- Medium: 100–299.99
+-- High: 300 and above
+
+select 
+o.order_id,
+case
+    when o.order_amount < 100 then 'Low'
+    when o.order_amount between 100 and 299.99 then 'Medium'
+    else 'High'
+end as value_category
+from orders o
+
+
+-- Day 10 Question 2
+-- Count orders in each value category.
+select 
+count(*),
+case
+    when o.order_amount < 100 then 'Low'
+    when o.order_amount between 100 and 299.99 then 'Medium'
+    else 'High'
+end as value_category
+from orders o
+group by value_category
+
+
+-- Day 10 Question 3
+-- Calculate completed revenue by value category.
+
+select
+sum(o.order_amount) as ttl_com_order_amt,
+case
+    when o.order_amount < 100 then 'Low'
+    when o.order_amount between 100 and 299.99 then 'Medium'
+    else 'High'
+end as order_category
+from orders o
+where o.order_status = 'completed'
+group by order_category
+
+
+-- Day 10 Question 4
+-- Categorize employees by salary:
+-- Junior: below 55000
+-- Mid: 55000–69999
+-- Senior: 70000 and above
+
+select 
+e.employee_id,
+case
+    when e.salary < 55000 then 'Junior'
+    when e.salary between 55000 and 69999 then 'Mid'
+    else 'Senior'
+end as emp_category
+from employees e
+
+
+-- Day 10 Question 5
+-- Count employees in each salary category.
+
+select 
+count(*),
+case
+    when e.salary < 55000 then 'Junior'
+    when e.salary between 55000 and 69999 then 'Med'
+    else 'Senior'
+end as emp_category
+from employees e
+group by emp_category
+
+-- Day 10 Question 6
+-- Create customer spending tiers:
+-- Low spender -- Medium spender -- High spender
+
+select 
+customer_name,
+case
+    when customer_total_spending < 500 then 'Low spender'
+    when customer_total_spending between 500 and 799.99 then 'Medium spender'
+    else 'High spender'
+end as order_category
+from (
+    select customer_name,
+    sum(order_amount) as customer_total_spending
+    from orders
+    group by customer_name
+) 
+
+
+-- Day 10 Question 7
+-- Show each order with:
+-- order amount
+-- payment method
+-- order status
+-- value category
+
+select 
+o.order_amount,
+o.payment_method,
+o.order_status,
+case
+    when o.order_amount < 100 then 'Low'
+    when o.order_amount between 100 and 299.99 then 'Medium'
+    else 'High'
+end as value_category
+from orders o
+
+-- Day 10 Question 8
+-- Business question: Which customer/order segment 
+-- should the business focus on?
+
+-- Ans: High-value orders coontribute majority of revenue.
+-- Focus marketing on customers with high total spending 
