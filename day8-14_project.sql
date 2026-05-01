@@ -283,7 +283,11 @@ case
     else 'High'
 end as value_category
 from orders o
-group by value_category
+group by (case
+    when o.order_amount < 100 then 'Low'
+    when o.order_amount between 100 and 299.99 then 'Medium'
+    else 'High'
+end)
 
 
 -- Day 10 Question 3
@@ -298,7 +302,11 @@ case
 end as order_category
 from orders o
 where o.order_status = 'completed'
-group by order_category
+group by (case
+    when o.order_amount < 100 then 'Low'
+    when o.order_amount between 100 and 299.99 then 'Medium'
+    else 'High'
+end)
 
 
 -- Day 10 Question 4
@@ -328,7 +336,11 @@ case
     else 'Senior'
 end as emp_category
 from employees e
-group by emp_category
+group by (case
+    when e.salary < 55000 then 'Junior'
+    when e.salary between 55000 and 69999 then 'Med'
+    else 'Senior'
+end)
 
 -- Day 10 Question 6
 -- Create customer spending tiers:

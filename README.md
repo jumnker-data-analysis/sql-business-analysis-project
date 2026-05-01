@@ -46,6 +46,12 @@ The dataset includes:
 
 ---
 
+##  Progress 
+-- ✅ Day 1-7 SQL fundamentals
+-- ✅ Day 8-9 Subqueries & correlated queries
+-- ✅ Day 10 CASE statemens & segmentation
+---
+
 ## 📈 Key Learning Outcomes
 - Handling one-to-many relationships
 - Avoiding aggregation errors
