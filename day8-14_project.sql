@@ -385,3 +385,151 @@ from orders o
 
 -- Ans: High-value orders coontribute majority of revenue.
 -- Focus marketing on customers with high total spending 
+
+
+
+-- Day 11 Question 1
+-- Rank employees by total completed revenue.
+
+select 
+o.employee_id,
+e.first_name||' '||e.last_name as full_name,
+sum(o.order_amount) as total_revenue,
+rank() over(order by sum(o.order_amount) desc) as rank
+from orders o
+left join employees e
+on e.employee_id = o.employee_id
+where o.order_status = 'completed'
+group by o.employee_id, e.first_name||' '||e.last_name
+
+;
+-- Day 11 Question 2
+-- Rank departments by completed revenue.
+
+select 
+d.department_name,
+sum(o.order_amount) as total_revenue,
+rank() over(order by sum(o.order_amount) desc) as rank
+from orders o
+join employees e
+on e.employee_id = o.employee_id
+join departments d 
+on d.department_id = e.department_id
+where o.order_status = 'completed'
+group by d.department_name
+;
+
+-- Day 11 Question 3
+-- Rank orders by order amount from highest to lowest.
+
+select 
+order_id,
+order_amount,
+rank() over(order by order_amount desc)
+from orders
+;
+
+-- Day 11 Question 4
+-- Show top 3 orders per payment method.
+select *
+from 
+(
+select
+order_amount,
+payment_method,
+rank() over(partition by payment_method 
+order by order_amount desc) as rnk 
+from orders
+) as rank_table
+where rnk <= 3
+;
+
+
+-- Day 11 Question 5
+-- Show top employee per department by completed revenue.
+select *
+from
+(
+select 
+o.employee_id,
+d.department_name,
+e.first_name||' '||e.last_name as full_name,
+sum(o.order_amount) as total_revenue,
+rank() over(partition by d.department_name 
+order by sum(o.order_amount) desc) as rnk
+from orders o
+join employees e
+on e.employee_id = o.employee_id
+join departments d 
+on d.department_id = e.department_id
+where o.order_status = 'completed'
+group by d.department_name, o.employee_id, e.first_name||' '||e.last_name
+
+) as rnk_table
+where rnk =1
+;
+
+-- Day 11 Question 6
+-- Show each employee’s orders and rank their orders by amount.
+
+select 
+employee_id,
+order_id,
+order_amount,
+rank() over(partition by employee_id 
+order by order_amount desc)
+from orders
+;
+
+
+-- Day 11 Question 7
+-- Use `ROW_NUMBER()` to find each employee’s highest-value order.
+select *
+from
+(
+select 
+employee_id,
+order_id,
+order_amount,
+ROW_NUMBER() over(partition by employee_id 
+order by order_amount desc) as row_num
+from orders
+
+)
+where row_num = 1
+;
+
+-- Day 11 Question 8
+-- Compare `RANK()` and `DENSE_RANK()` using employee revenue.
+
+select 
+employee_id,
+sum(order_amount),
+rank() over(order by sum(order_amount) desc),
+dense_rank() over(order by sum(order_amount) desc)
+from orders
+group by employee_id
+;
+
+
+### Stretch
+Business question:
+> Who are the top performers, and are they concentrated in one department?
+
+select 
+o.employee_id,
+d.department_name,
+sum(o.order_amount),
+rank() over(order by sum(o.order_amount) desc),
+dense_rank() over(order by sum(o.order_amount) desc)
+from orders o
+join employees e
+on e.employee_id = o.employee_id
+join departments d 
+on d.department_id = e.department_id
+group by o.employee_id, d.department_name
+;
+
+-- the top performers are concentrated at 3 deparments 
+-- sales 3, operations 2 and finance 2. it seems shows sales 
+-- department dominately perfomce the best over the period. 
