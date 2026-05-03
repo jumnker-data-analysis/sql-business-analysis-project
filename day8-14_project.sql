@@ -533,3 +533,153 @@ group by o.employee_id, d.department_name
 -- the top performers are concentrated at 3 deparments 
 -- sales 3, operations 2 and finance 2. it seems shows sales 
 -- department dominately perfomce the best over the period. 
+
+
+
+-- Day 12 Question 1
+-- Calculate monthly completed revenue.
+
+select 
+extract(month from order_timestamp) as order_month,
+sum(order_amount) as monthly_revenue
+from orders 
+where order_status = 'completed'
+group by extract(month from order_timestamp)
+order by order_month
+;
+
+-- Day 12 Question 2
+-- Calculate running total revenue by month.
+
+select
+order_month,
+monthly_revenue,
+sum(monthly_revenue) over(
+    order by order_month
+    rows between unbounded preceding and current row
+) as running_monthly_revenue
+from
+(
+    select 
+    extract(month from order_timestamp) as order_month,
+    sum(order_amount) as monthly_revenue
+    from orders 
+    where order_status = 'completed'
+    group by extract(month from order_timestamp)
+    order by order_month
+)
+;
+
+-- Day 12 Question 3
+-- Calculate monthly order count.
+
+
+select 
+extract(month from order_timestamp) as order_month,
+count(*) as monthly_orders
+from orders
+where order_status = 'completed'
+group by extract(month from order_timestamp)
+order by order_month
+;
+
+
+-- Day 12 Question 4
+-- Calculate running total order count by month.
+
+select
+order_month,
+monthly_orders,
+sum(monthly_orders) over(order by order_month)
+from
+(
+    select 
+    extract(month from order_timestamp) as order_month,
+    count(*) as monthly_orders
+    from orders
+    where order_status = 'completed'
+    group by extract(month from order_timestamp)
+    order by order_month
+)
+;
+
+
+-- Day 12 Question 5
+-- Calculate completed revenue by department and month.
+
+select 
+e.department_id,
+extract(month from o.order_timestamp) as order_month,
+sum(o.order_amount) as dep_monthly_revenue
+from orders o
+join employees e
+on e.employee_id = o.employee_id
+where o.order_status = 'completed'
+group by e.department_id, extract(month from o.order_timestamp)
+;
+
+
+-- Day 12 Question 6
+-- Calculate running revenue by department over time.
+
+select
+department_id,
+order_month,
+dep_monthly_revenue,
+sum(dep_monthly_revenue) over(partition by department_id
+order by order_month) as dep_monthly_revenue_running
+from
+(
+    select 
+    e.department_id,
+    extract(month from o.order_timestamp) as order_month,
+    sum(o.order_amount) as dep_monthly_revenue
+    from orders o
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by e.department_id, 
+    extract(month from o.order_timestamp)
+)
+;
+
+-- Day 12 Question 7
+-- Show each order with:
+-- order amount
+-- order month
+-- cumulative revenue so far
+
+select
+order_id,
+order_timestamp,
+extract(month from order_timestamp) as order_month,
+order_amount,
+sum(order_amount) over(order by order_timestamp)
+from 
+orders
+;
+
+-- Day 12 Question 8
+-- Business question: Which month had the strongest 
+-- revenue momentum?
+
+-- according to monthly completed revenue.
+select 
+order_month,
+sum(order_amount) as monthly_revenue
+from
+    (
+    select *,
+    extract(month from order_timestamp) as order_month
+    from orders 
+    )
+where order_status = 'completed'
+group by order_month
+;
+-- January shows the strongest revenue momentum, indicating 
+-- peak csutomer demand successful campaigns during this
+-- period.  
+.
+
+
+
