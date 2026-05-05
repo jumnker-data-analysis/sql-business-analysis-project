@@ -91,7 +91,6 @@ CTE works like a temporary table that improves query readability.
 - Customer segmentation (CASE)
 - Monthly revenue CTE
 - Running totals with window functions
-
 ---
 
 ## 📈 Key Learning Outcomes
