@@ -683,3 +683,248 @@ group by order_month
 
 
 
+-- Day 13 — CTEs: Clean Query Structure
+
+-- Goal
+-- Use `WITH` statements to make complex business queries easier to read.
+
+-- Day 13 Question 1
+-- Create a CTE for completed orders only.
+
+with CTE_completed as 
+(
+    select *
+    from orders
+    where order_status = 'completed'
+)
+select *
+from CTE_completed
+;
+
+-- Day 13 Question 2
+-- Use that CTE to calculate total completed revenue.
+
+with CTE_completed as 
+(
+    select *
+    from orders
+    where order_status = 'completed'
+)
+select sum(order_amount) as total_completed_revenue
+from CTE_completed
+;
+
+-- Day 13 Question 3.
+-- Create a CTE for employee revenue.
+
+with CTE_completed_employee as
+(
+    select
+    distinct e.employee_id,
+    e.first_name,
+    e.last_name, 
+    sum(o.order_amount) 
+    over(partition by e.employee_id) as employee_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+)
+select *
+from CTE_completed_employee
+;
+
+-- Day 13 Question 4
+-- Use the employee revenue CTE to rank employees.
+
+with CTE_completed_employee as
+(
+    select
+    distinct e.employee_id,
+    e.first_name,
+    e.last_name,    
+    sum(o.order_amount) 
+    over(partition by e.employee_id) as employee_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+)
+select
+rank() over(order by employee_revenue desc) as rnk,
+employee_id,
+employee_revenue,
+last_name||' '||first_name as full_name
+from CTE_completed_employee
+;
+
+-- Day 13 Question 5
+-- Create a department revenue CTE.
+
+with CTE_completed_department as
+(
+    select
+    distinct d.department_name,
+    sum(o.order_amount) 
+    over(partition by d.department_name) as deparment_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    join departments d
+    on d.department_id = e.department_id
+    where o.order_status = 'completed'
+)
+select *
+from CTE_completed_department
+;
+
+-- Day 13 Question 6
+-- Use the department revenue CTE to find the top department.
+
+with CTE_completed_department as
+(
+    select
+    distinct d.department_name,
+    sum(o.order_amount) 
+    over(partition by d.department_name) as department_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    join departments d
+    on d.department_id = e.department_id
+    where o.order_status = 'completed'
+)
+select
+rank() over(order by department_revenue desc) as rnk,
+department_name,
+department_revenue
+from CTE_completed_department
+order by department_revenue desc
+limit 1
+;
+
+-- Day 13 Question 7
+-- Create a customer spending CTE.
+
+with CTE_completed_customer as 
+(
+    select
+    distinct customer_name,
+    sum(order_amount) 
+    over(partition by customer_name) as customer_spending
+    from orders
+    where order_status = 'completed'
+)
+select *
+from CTE_completed_customer
+;
+
+-- Day 13 Question 8
+-- Use the customer spending CTE to segment customers 
+-- into Low / Medium / High.
+
+with CTE_completed_customer as 
+(
+    select
+    distinct customer_name,
+    sum(order_amount) 
+    over(partition by customer_name) as customer_spending
+    from orders
+    where order_status = 'completed'
+)
+select 
+customer_name,
+customer_spending,
+case
+    when customer_spending < 500 then 'Low spender'
+    when customer_spending between 500 and 799.99 then 'Medium spender'
+    else 'High spender'
+end as customer_category
+from CTE_completed_customer
+;
+
+-- Day 13 Question 9
+-- Create a CTE for monthly revenue.
+
+with CTE_completed_month as 
+(
+    select
+    distinct extract(month from order_timestamp) as order_month,
+    sum(order_amount) 
+    over(partition by extract(month from order_timestamp)) as monthly_revenue
+    from orders
+    where order_status = 'completed'
+)
+select *
+from CTE_completed_month
+;
+
+-- Day 13 Question 10
+--Use the monthly revenue CTE to calculate running total revenue.
+
+with CTE_completed_month as 
+(
+    select
+    distinct extract(month from order_timestamp) as order_month,
+    sum(order_amount) 
+    over(partition by extract(month from order_timestamp)) as monthly_revenue
+    from orders
+    where order_status = 'completed'
+)
+select
+order_month,
+sum(monthly_revenue) over(order by order_month 
+rows between unbounded preceding and current row
+) as running_monthly_revenue
+from CTE_completed_month
+;
+
+### Stretch
+Rewrite one Day 7 query using a CTE and compare readability.
+
+---
+
+## Day 14 — Mini Project: Business Performance Analysis
+
+### Goal
+Combine JOIN, GROUP BY, CASE WHEN, CTE, and window functions into one mini project.
+
+### Mini Project Theme
+**Small Business Revenue & Employee Performance Analysis**
+
+### Required Questions
+1. What is the total completed revenue?
+2. What is the completed order count?
+3. What is the average completed order value?
+4. Which department generated the most completed revenue?
+5. Which employee generated the most completed revenue?
+6. Which employee handled the most completed orders?
+7. Which payment method generated the most completed revenue?
+8. Which customer occupation generated the most revenue?
+9. Which month generated the highest completed revenue?
+10. Which employees had zero completed revenue?
+11. Which department has the highest average order value?
+12. Which order value segment contributes the most revenue?
+13. Rank employees by completed revenue.
+14. Rank departments by completed revenue.
+15. Write 3 business recommendations based on your SQL results.
+
+### Final Deliverable
+Create a file:
+
+```text
+day14_business_performance_analysis.sql
+```
+
+Include:
+- clean comments
+- final SQL queries only
+- readable aliases
+- business insight comments under each major query
+
+Example comment:
+
+```sql
+-- Insight:
+-- Sales generated the highest completed revenue, suggesting stronger customer-facing activity.
+```

@@ -50,6 +50,48 @@ The dataset includes:
 - ✅ Day 1-7 SQL fundamentals
 - ✅ Day 8-9 Subqueries & correlated queries
 - ✅ Day 10 CASE statemens & segmentation
+## Day 11 - Window Functions
+
+- Used RANK() to rank employees and departments by revenue
+- Applied ROW_NUMBER() to find top orders per employee
+- Implemented PARTITION BY for grouped ranking
+- Business insight: Top performers concentrated in key departments
+
+## Day 12 - Monthly Revenue & Running Totals
+
+In Day 12, I practiced time-based SQL analysis using PostgreSQL.
+
+### Skills practiced
+- EXTRACT(MONTH FROM timestamp)
+- Monthly revenue analysis
+- Monthly order count
+- Running totals using SUM() OVER()
+- Revenue by department and month
+- Business insight writing
+
+### Key business insight
+January had the strongest completed revenue, suggesting stronger customer demand or stronger sales activity during that period.
+
+## Day 13 - Introduction to CTE
+
+### Topics
+- Basic CTE structure
+- Creating temporary result sets
+- Simple revenue aggregation
+
+### Key learning
+CTE works like a temporary table that improves query readability.
+
+
+## Day 14 - Advanced CTE Applications
+
+### Topics
+- Employee revenue ranking (RANK)
+- Department revenue analysis
+- Customer segmentation (CASE)
+- Monthly revenue CTE
+- Running totals with window functions
+
 ---
 
 ## 📈 Key Learning Outcomes
