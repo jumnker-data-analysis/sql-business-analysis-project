@@ -91,6 +91,14 @@ CTE works like a temporary table that improves query readability.
 - Customer segmentation (CASE)
 - Monthly revenue CTE
 - Running totals with window functions
+
+## Day 15
+- Refactored old SQL queries
+- Improved readable using CTEs
+- Added business insights from previous challenges
+- Practiced writing cleaner and more maintainable SQL
+
+
 ---
 
 ## 📈 Key Learning Outcomes
