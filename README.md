@@ -98,6 +98,34 @@ CTE works like a temporary table that improves query readability.
 - Added business insights from previous challenges
 - Practiced writing cleaner and more maintainable SQL
 
+# Day 16 — Advanced Ranking Analysis
+
+## Skills Practiced
+- CTE (Common Table Expressions)
+- RANK()
+- DENSE_RANK()
+- ROW_NUMBER()
+- PARTITION BY
+- Running totals
+- Monthly leaderboard analysis
+- Employee performance ranking
+- Department revenue analysis
+- Business insight generation
+
+## Challenges Completed
+1. Rank employees by completed revenue
+2. Compare RANK() vs DENSE_RANK()
+3. Compare ROW_NUMBER() vs RANK()
+4. Find top 5 customers by spending
+5. Rank departments by total revenue
+6. Find lowest-performing employees
+7. Rank employees within each department
+8. Find top monthly revenue by employee
+9. Build monthly employee leaderboard
+10. Add business insight comments
+
+## Key Learning
+Today focused heavily on analytical SQL using window functions and CTEs to simulate real business reporting scenarios.
 
 ---
 

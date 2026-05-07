@@ -68,3 +68,395 @@ from CTE_emp_total_com_rev
 -- 10. Use the monthly revenue CTE to calculate running total revenue.
 -- Business insights:
 -- Revenue trends increased significantly in January 
+
+
+-- Day 16 — Advanced Ranking Analysis
+-- Day 16 question 1  
+-- Rank employees by completed revenue using RANK().
+
+with CTE_emp_total_com_rev as
+(
+select 
+o.employee_id,
+e.first_name||' '||e.last_name as full_name,
+sum(o.order_amount) as total_revenue
+from orders o
+left join employees e
+on e.employee_id = o.employee_id
+where o.order_status = 'completed'
+group by o.employee_id, e.first_name||' '||e.last_name
+)
+select 
+employee_id,
+full_name,
+total_revenue,
+rank() over(order by total_revenue desc) as rnk
+from CTE_emp_total_com_rev
+;
+
+-- Day 16 question 2 
+-- Rank employees using DENSE_RANK().
+
+with CTE_emp_total_com_rev as
+(
+select 
+o.employee_id,
+e.first_name||' '||e.last_name as full_name,
+sum(o.order_amount) as total_revenue
+from orders o
+left join employees e
+on e.employee_id = o.employee_id
+where o.order_status = 'completed'
+group by o.employee_id, e.first_name||' '||e.last_name
+)
+select 
+employee_id,
+full_name,
+total_revenue,
+dense_rank() over(order by total_revenue desc) as dense_rnk
+from CTE_emp_total_com_rev
+;
+
+-- Day 16 question 3
+-- Compare ROW_NUMBER() vs RANK().
+
+with CTE_emp_total_com_rev as
+(
+select 
+o.employee_id,
+e.first_name||' '||e.last_name as full_name,
+sum(o.order_amount) as total_revenue
+from orders o
+left join employees e
+on e.employee_id = o.employee_id
+where o.order_status = 'completed'
+group by o.employee_id, e.first_name||' '||e.last_name
+)
+select 
+employee_id,
+full_name,
+total_revenue,
+rank() over(order by total_revenue desc) as rnk,
+ROW_NUMBER() over(order by total_revenue desc) as dense_rnk
+from CTE_emp_total_com_rev
+;
+
+-- the differnce between ROW_NUMBER() vs RANK() is that 
+-- ROW_NUMBER() return the serial number for each rows of the   
+-- column in order . RANK() return the serial number  when
+-- same value occurs multiple times. RANK() return them
+-- as the same number but ROW_NUMBER() return serial number of the 
+-- posistion in order.
+
+
+-- Day 16 question 4
+-- Find top 5 customers by spending.
+
+with CTE_completed_customer as 
+(
+    select
+    distinct customer_name,
+    sum(order_amount) 
+    over(partition by customer_name) as customer_spending
+    from orders
+    where order_status = 'completed'
+)
+select *
+from CTE_completed_customer
+order by customer_spending desc
+limit 5
+;
+
+
+-- Day 16 question 5
+-- Rank departments by total revenue.
+
+with CTE_completed_department as
+(
+    select
+    distinct d.department_name,
+    d.department_id,
+    sum(o.order_amount) 
+    over(partition by d.department_name) as department_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    join departments d
+    on d.department_id = e.department_id
+    where o.order_status = 'completed'
+)
+select
+rank() over(order by department_revenue desc) as rnk,
+department_name,
+department_id,
+department_revenue
+from CTE_completed_department
+order by department_revenue desc
+;
+
+-- Day 16 question 6
+-- Find the lowest-performing employees.
+
+with tem_tbl as
+(
+    select
+    distinct 
+    e.department_id,
+    e.employee_id,
+    e.first_name,
+    e.last_name,    
+    sum(o.order_amount) 
+    over(partition by e.employee_id) as employee_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+),
+
+CTE_completed_employee as
+(
+    select *
+    from tem_tbl
+    union
+    select 
+    department_id,
+    employee_id,
+    first_name,
+    last_name,
+    0 as employee_revenue
+    from employees 
+    where employee_id not in 
+    (
+        select employee_id
+        from tem_tbl
+    )
+)
+select
+rank() over(order by employee_revenue desc) as rnk,
+department_id,
+employee_id,
+employee_revenue,
+last_name||' '||first_name as full_name
+from CTE_completed_employee
+order by employee_revenue
+;
+
+-- Day 16 question 7
+-- Rank employees within each department.
+
+with tem_tbl as 
+(
+    select
+    distinct 
+    d.department_id,
+    e.employee_id,
+    e.first_name||' '||e.last_name as full_name,
+    sum(o.order_amount) 
+    over(partition by e.employee_id) as employee_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    join departments d
+    on d.department_id = e.department_id
+    where o.order_status = 'completed'
+),
+CTE_completed_employee as
+(
+    select *
+    from tem_tbl
+    union
+    select 
+    department_id,
+    employee_id,
+    first_name||' '||last_name as full_name,
+    0 as employee_revenue
+    from employees 
+    where employee_id not in 
+    (
+        select employee_id
+        from tem_tbl
+    )
+)
+select 
+*,
+rank() over(partition by department_id order by employee_revenue desc) as rnk,
+case
+    when department_id ='1' then 'Sales'
+    when department_id ='2' then 'Operations'
+    when department_id ='3' then 'Finance'
+    when department_id ='4' then 'Analytics'
+    else 'Human Resources'
+    end as department_name
+from CTE_completed_employee
+;
+
+
+-- Day 16 question 8
+-- Find top monthly revenue by employee.
+
+with employee_monthly_revenue as
+(
+    select
+    extract(month from o.order_timestamp) as order_month,
+    e.department_id,
+    e.employee_id,
+    e.first_name||' '||e.last_name as full_name,
+    sum(o.order_amount) monthly_revenue
+    from orders o
+    inner join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by 
+        extract(month from o.order_timestamp),
+        e.department_id,
+        e.employee_id,
+        full_name
+),
+
+ranked_employee_month as
+(
+    select 
+    *,
+    rank() over(partition by order_month order by monthly_revenue desc) as rnk
+    from employee_monthly_revenue
+)
+select *
+from ranked_employee_month
+where rnk = '1'
+;
+
+
+
+-- Day 16 question 9
+-- Build a leaderboard query with full names.
+
+with employee_monthly_revenue as
+(
+    select
+    extract(month from o.order_timestamp) as order_month,
+    e.department_id,
+    e.employee_id,
+    e.first_name||' '||e.last_name as full_name,
+    sum(o.order_amount) monthly_revenue
+    from orders o
+    inner join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by 
+        extract(month from o.order_timestamp),
+        e.department_id,
+        e.employee_id,
+        full_name
+),
+
+ranked_employee_month as
+(
+    select 
+    *,
+    rank() over(partition by order_month order by monthly_revenue desc) as rnk
+    from employee_monthly_revenue
+)
+select 
+    order_month,    
+    full_name,
+    monthly_revenue,
+    rnk,
+    case
+    when department_id ='1' then 'Sales'
+    when department_id ='2' then 'Operations'
+    when department_id ='3' then 'Finance'
+    when department_id ='4' then 'Analytics'
+    else 'Human Resources'
+    end as department_name
+from ranked_employee_month
+where rnk in (1, 2, 3)
+order by order_month, rnk
+;
+
+
+-- Day 16 question 1 —
+10. Add business insights comments.
+
+---
+
+## Day 17 — LEAD & LAG Trend Analysis
+1. Calculate monthly revenue.
+2. Compare current month vs previous month using LAG().
+3. Compare current month vs next month using LEAD().
+4. Find revenue growth difference month-to-month.
+5. Find largest revenue increase.
+6. Find largest revenue decrease.
+7. Compare customer spending trends over time.
+8. Compare department monthly performance.
+9. Create revenue momentum insights.
+10. Add business explanations for trends.
+
+---
+
+## Day 18 — Running Totals + Rolling Analysis
+1. Create running total revenue.
+2. Create running customer spending.
+3. Create cumulative department revenue.
+4. Build rolling monthly averages.
+5. Compare cumulative revenue by department.
+6. Track customer growth over time.
+7. Create running order counts.
+8. Compare cumulative completed vs pending orders.
+9. Combine running totals with ranking.
+10. Write business insights from rolling metrics.
+
+---
+
+## Day 19 — Employee Performance Mini Project
+1. Create employee revenue CTE.
+2. Rank employees by completed revenue.
+3. Calculate cumulative employee revenue.
+4. Compare employee monthly performance.
+5. Identify consistent top performers.
+6. Compare departments using employee data.
+7. Create employee performance segmentation.
+8. Find performance trends over time.
+9. Add business recommendations.
+10. Create final business summary comments.
+
+---
+
+## Day 20 — Customer Analytics Mini Project
+1. Create customer spending CTE.
+2. Segment customers into Low / Medium / High.
+3. Rank top customers.
+4. Calculate cumulative customer spending.
+5. Analyze repeat customers.
+6. Find highest monthly spending customers.
+7. Compare customer growth trends.
+8. Identify top revenue contributors.
+9. Add customer behavior insights.
+10. Create final business summary.
+
+---
+
+## Day 21 — Revenue Trend Dashboard Queries
+1. Build monthly revenue table.
+2. Build monthly order count table.
+3. Compare revenue growth rates.
+4. Create running revenue dashboard query.
+5. Compare department monthly trends.
+6. Rank monthly performance.
+7. Find strongest growth periods.
+8. Find weakest months.
+9. Add executive-style business insights.
+10. Organize queries into dashboard sections.
+
+---
+
+## Day 22 — Portfolio Optimization + Refactoring
+1. Rewrite an old query using CTE.
+2. Rewrite a subquery using window functions.
+3. Improve alias naming consistency.
+4. Improve query readability and spacing.
+5. Reduce duplicated logic.
+6. Add professional SQL comments.
+7. Add business insights sections.
+8. Create recruiter-friendly README notes.
+9. Organize SQL files professionally.
+10. Select best portfolio queries for GitHub.
