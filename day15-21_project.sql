@@ -374,22 +374,232 @@ order by order_month, rnk
 ;
 
 
--- Day 16 question 1 —
-10. Add business insights comments.
+-- Day 16 question 10
+-- Add business insights comments.
 
 ---
 
-## Day 17 — LEAD & LAG Trend Analysis
-1. Calculate monthly revenue.
-2. Compare current month vs previous month using LAG().
-3. Compare current month vs next month using LEAD().
-4. Find revenue growth difference month-to-month.
-5. Find largest revenue increase.
-6. Find largest revenue decrease.
-7. Compare customer spending trends over time.
-8. Compare department monthly performance.
-9. Create revenue momentum insights.
-10. Add business explanations for trends.
+-- Day 17 — LEAD & LAG Trend Analysis
+-- Day 17 question 1
+-- Calculate monthly revenue.
+
+select
+extract(month from o.order_timestamp) as order_month,
+sum(o.order_amount) monthly_revenue
+from orders o
+join employees e
+on e.employee_id = o.employee_id
+where o.order_status = 'completed'
+group by extract(month from o.order_timestamp)
+order by order_month
+;
+
+-- Day 17 question 2
+-- Compare current month vs previous month using LAG().
+
+select 
+order_month,
+monthly_revenue,
+lag(monthly_revenue) over(order by order_month)
+from (
+    select
+    extract(month from o.order_timestamp) as order_month,
+    sum(o.order_amount) monthly_revenue
+    from orders o
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by extract(month from o.order_timestamp)
+    order by order_month
+) as temp_com_mon
+;
+
+-- Day 17 question 3
+-- Compare current month vs next month using LEAD().
+
+select 
+order_month,
+monthly_revenue,
+lead(monthly_revenue) over(order by order_month)
+from (
+    select
+    extract(month from o.order_timestamp) as order_month,
+    sum(o.order_amount) monthly_revenue
+    from orders o
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by extract(month from o.order_timestamp)
+    order by order_month
+) as temp_com_mon
+;
+
+-- Day 17 question 4
+-- Find revenue growth difference month-to-month.
+
+select 
+order_month,
+monthly_revenue,
+lag(monthly_revenue) 
+over(order by order_month) as pre_monthly_revenue,
+(monthly_revenue-lag(monthly_revenue) 
+over(order by order_month)) as MoM_growth
+from (
+    select
+    extract(month from o.order_timestamp) as order_month,
+    sum(o.order_amount) monthly_revenue
+    from orders o
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by extract(month from o.order_timestamp)
+    order by order_month
+) as temp_com_mon
+;
+
+-- Day 17 question 5
+-- Find largest revenue increase.
+
+select
+*
+from(
+    select 
+    order_month,
+    monthly_revenue,
+    lag(monthly_revenue) 
+    over(order by order_month) as pre_monthly_revenue,
+    (monthly_revenue-lag(monthly_revenue) 
+    over(order by order_month)) as MoM_growth
+    from 
+    (
+        select
+        extract(month from o.order_timestamp) as order_month,
+        sum(o.order_amount) monthly_revenue
+        from orders o
+        join employees e
+        on e.employee_id = o.employee_id
+        where o.order_status = 'completed'
+        group by extract(month from o.order_timestamp)
+        order by order_month
+    ) as temp_com_mon
+) as temp_com_mon_growth
+where mom_growth is not null
+order by mom_growth desc
+limit 1
+;
+
+-- Day 17 question 6
+-- Find largest revenue decrease.
+
+select
+*
+from(
+    select 
+    order_month,
+    monthly_revenue,
+    lag(monthly_revenue) 
+    over(order by order_month) as pre_monthly_revenue,
+    (monthly_revenue-lag(monthly_revenue) 
+    over(order by order_month)) as MoM_growth
+    from 
+    (
+        select
+        extract(month from o.order_timestamp) as order_month,
+        sum(o.order_amount) monthly_revenue
+        from orders o
+        join employees e
+        on e.employee_id = o.employee_id
+        where o.order_status = 'completed'
+        group by extract(month from o.order_timestamp)
+        order by order_month
+    ) as temp_com_mon
+) as temp_com_mon_growth
+where mom_growth is not null
+order by mom_growth asc
+limit 1
+;
+
+-- Day 17 question 7
+-- Compare customer spending trends over time.
+
+select
+customer_name,
+order_month,
+monthly_spending,
+lag(monthly_spending) 
+over(partition by customer_name order by order_month) 
+as previous_month_spending,
+monthly_spending - lag(monthly_spending) 
+over(partition by customer_name order by order_month) 
+as mom_customer_growth
+from (
+    select
+    customer_name,
+    extract(month from order_timestamp) as order_month,
+    sum(order_amount) as monthly_spending
+    from orders
+    where order_status = 'completed'
+    group by customer_name, extract(month from order_timestamp)
+) as customer_monthly
+;
+
+-- Day 17 question 8
+-- Compare department monthly performance.
+
+select 
+department_id,
+order_month,
+monthly_revenue,
+lag(monthly_revenue) 
+over(partition by department_id order by order_month) 
+as pre_monthly_revenue,
+(monthly_revenue-lag(monthly_revenue) 
+over(partition by department_id order by order_month)) as MoM_growth
+from (
+    select
+    department_id,
+    extract(month from o.order_timestamp) as order_month,
+    sum(o.order_amount) monthly_revenue
+    from orders o
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by 
+    extract(month from o.order_timestamp),
+    department_id
+    order by department_id, order_month
+) as temp_com_mon
+order by department_id, order_month
+;
+
+-- Day 17 question 9
+-- Create revenue momentum insights.
+
+-- Business insight:
+-- Monthly completed revenue shows unstable momentum.
+-- Revenue decreased sharply from month 1 to month 2,
+-- recovered slightly in month 3,
+-- then dropped strongly again in month 4.
+-- This suggests the business should investigate why revenue declined
+-- after the strongest month.
+-- Month 1 generated the highest completed revenue.
+-- Month 2 decreased by 1098.21 compared with Month 1.
+-- Month 3 slightly recovered by 59.03 compared with Month 2.
+-- Month 4 had the largest decrease, dropping by 2065.79.
+
+-- Day 17 question 10
+-- Add business explanations for trends.
+
+-- Business explanation:
+-- The strongest revenue period was Month 1.
+-- The biggest negative movement happened in Month 4.
+-- Possible reasons could include fewer completed orders,
+-- lower average order value,
+-- weaker customer demand,
+-- or lower employee/department performance.
+-- The business should compare order count, average order amount,
+-- department revenue, and customer spending to explain the drop.
+
 
 ---
 

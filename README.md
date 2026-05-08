@@ -98,7 +98,7 @@ CTE works like a temporary table that improves query readability.
 - Added business insights from previous challenges
 - Practiced writing cleaner and more maintainable SQL
 
-# Day 16 — Advanced Ranking Analysis
+## Day 16 — Advanced Ranking Analysis
 
 ## Skills Practiced
 - CTE (Common Table Expressions)
@@ -126,6 +126,19 @@ CTE works like a temporary table that improves query readability.
 
 ## Key Learning
 Today focused heavily on analytical SQL using window functions and CTEs to simulate real business reporting scenarios.
+
+## Day 17 — LEAD & LAG Trend Analysis
+
+### Skills Practiced
+- LEAD()
+- LAG()
+- Month-to-month revenue comparison
+- Revenue increase/decrease analysis
+- Department monthly performance trends
+- Business trend explanation
+
+### Key Insight
+Monthly completed revenue showed unstable momentum, with the strongest revenue in Month 1 and the largest decline in Month 4.
 
 ---
 
