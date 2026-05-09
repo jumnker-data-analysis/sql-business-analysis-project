@@ -740,7 +740,9 @@ from CTE_completed_employee
 with CTE_completed_employee as
 (
     select
-    distinct e.employee_id,
+    distinct 
+    e.department_id,
+    e.employee_id,
     e.first_name,
     e.last_name,    
     sum(o.order_amount) 
@@ -752,6 +754,7 @@ with CTE_completed_employee as
 )
 select
 rank() over(order by employee_revenue desc) as rnk,
+department_id,
 employee_id,
 employee_revenue,
 last_name||' '||first_name as full_name
@@ -842,6 +845,8 @@ case
 end as customer_category
 from CTE_completed_customer
 ;
+-- High-spending cusotmers contributed disproportionately to 
+-- total revenue.
 
 -- Day 13 Question 9
 -- Create a CTE for monthly revenue.

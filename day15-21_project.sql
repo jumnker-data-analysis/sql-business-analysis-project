@@ -603,17 +603,119 @@ order by department_id, order_month
 
 ---
 
-## Day 18 — Running Totals + Rolling Analysis
-1. Create running total revenue.
-2. Create running customer spending.
-3. Create cumulative department revenue.
-4. Build rolling monthly averages.
-5. Compare cumulative revenue by department.
-6. Track customer growth over time.
-7. Create running order counts.
-8. Compare cumulative completed vs pending orders.
-9. Combine running totals with ranking.
-10. Write business insights from rolling metrics.
+-- Day 18 — Running Totals + Rolling Analysis
+-- Day 18 question 1
+-- Create running total revenue.
+
+select
+order_timestamp,
+order_amount,
+sum(order_amount) over(order by order_timestamp)
+from orders o
+where order_status = 'completed'
+;
+
+
+
+-- Day 18 question 2
+-- Create running customer spending.
+
+select
+order_timestamp,
+order_amount,
+customer_name,
+sum(order_amount) 
+over(partition by customer_name order by order_timestamp)
+from orders
+where order_status = 'completed'
+;
+
+-- Day 18 question 3
+-- Create cumulative department revenue.
+
+select
+o.order_timestamp,
+o.order_amount,
+department_id,
+sum(o.order_amount) 
+over(partition by e.department_id order by o.order_timestamp)
+from orders o
+join employees e
+on e.employee_id = o.employee_id
+where o.order_status = 'completed'
+;
+
+-- Day 18 question 4
+-- Build rolling monthly averages.
+
+select
+monthly_revenue,
+avg(monthly_revenue) 
+over(order by order_month 
+rows between 1 preceding and current row) as rolling_mon_avg
+from
+(
+    select
+    extract(month from order_timestamp) as order_month,
+    sum(order_amount) as monthly_revenue
+    from orders o
+    where order_status = 'completed'
+    group by extract(month from order_timestamp)
+)
+;
+
+
+-- Day 18 question 5
+-- Compare cumulative revenue by department.
+
+select
+o.order_timestamp,
+o.order_amount,
+department_id,
+sum(o.order_amount) 
+over(partition by e.department_id order by o.order_timestamp)
+from orders o
+join employees e
+on e.employee_id = o.employee_id
+where o.order_status = 'completed'
+;
+
+-- Day 18 question 6
+-- Track customer growth over time.
+
+select
+customer_name,
+round(((lead_amount-order_amount)/order_amount)*100, 2) 
+as cus_grw_percentage
+from
+(
+    select
+    order_timestamp,
+    order_amount,
+    customer_name,
+    lead(order_amount)
+    over(partition by customer_name order by order_timestamp) 
+    as lead_amount
+    from orders
+    where order_status = 'completed'
+)
+where (lead_amount-order_amount)/order_amount  is not null
+;
+
+-- Day 18 question 7
+-- Create running order counts.
+
+
+-- Day 18 question 8
+-- Compare cumulative completed vs pending orders.
+
+
+-- Day 18 question 9
+-- Combine running totals with ranking.
+
+
+-- Day 18 question 10
+-- Write business insights from rolling metrics.
 
 ---
 

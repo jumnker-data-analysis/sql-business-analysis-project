@@ -140,6 +140,32 @@ Today focused heavily on analytical SQL using window functions and CTEs to simul
 ### Key Insight
 Monthly completed revenue showed unstable momentum, with the strongest revenue in Month 1 and the largest decline in Month 4.
 
+## Day 18 – Running Totals + Rolling Analysis
+
+Topics practiced:
+- Running total revenue
+- Running customer spending
+- Cumulative department revenue
+- Rolling monthly averages
+- Running order counts
+- Cumulative completed vs pending orders
+- Combining running totals with ranking
+- Customer growth trend analysis
+
+Key SQL concepts:
+- Window Functions
+- SUM() OVER()
+- AVG() OVER()
+- PARTITION BY
+- LEAD()
+- Rolling metrics
+- Running cumulative calculations
+
+Business insights learned:
+- How revenue accumulates over time
+- How rolling averages smooth business trends
+- How departments contribute differently to revenue growth
+- How customer spending changes across time periods
 ---
 
 ## 📈 Key Learning Outcomes
