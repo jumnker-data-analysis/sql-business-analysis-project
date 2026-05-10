@@ -705,31 +705,289 @@ where (lead_amount-order_amount)/order_amount  is not null
 -- Day 18 question 7
 -- Create running order counts.
 
+select
+order_timestamp,
+order_id,
+order_status,
+count(order_id) 
+over(order by order_timestamp) as running_order_count
+from orders
+order by order_timestamp
+;
 
 -- Day 18 question 8
 -- Compare cumulative completed vs pending orders.
 
+select
+order_timestamp,
+order_status,
+count(case when order_status = 'completed' then 1 end)
+over(order by order_timestamp) as running_completed_orders,
+count(case when order_status = 'pending' then 1 end)
+over(order by order_timestamp) as running_pending_orders
+from orders
+where order_status in ('completed', 'pending')
+order by order_timestamp
+;
 
 -- Day 18 question 9
 -- Combine running totals with ranking.
 
+select
+order_timestamp,
+order_id,
+order_amount,
+sum(order_amount) over(order by order_timestamp) as running_revenue,
+rank() over(order by order_amount desc) as order_value_rank
+from orders
+where order_status = 'completed'
+order by order_timestamp
+;
 
 -- Day 18 question 10
 -- Write business insights from rolling metrics.
 
+-- Business insights:
+-- Running revenue shows how completed order revenue accumulates over time.
+-- Rolling monthly averages help smooth short-term changes and reveal the overall trend.
+-- Department cumulative revenue shows which teams contribute most consistently.
+-- Customer growth analysis helps identify customers whose spending increases or decreases over time.
+-- These rolling metrics are useful for monitoring business momentum instead of looking only at single-month performance.
+
 ---
 
-## Day 19 — Employee Performance Mini Project
-1. Create employee revenue CTE.
-2. Rank employees by completed revenue.
-3. Calculate cumulative employee revenue.
-4. Compare employee monthly performance.
-5. Identify consistent top performers.
-6. Compare departments using employee data.
-7. Create employee performance segmentation.
-8. Find performance trends over time.
-9. Add business recommendations.
-10. Create final business summary comments.
+-- Day 19 — Employee Performance Mini Project
+-- Day 19 question 1: Create employee revenue CTE.
+
+with CTE_completed_employee_revenue as
+(
+    select
+    e.employee_id,
+    e.first_name||' '||e.last_name as full_name,
+    sum(o.order_amount) as emp_com_rev
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by e.employee_id, e.first_name, e.last_name
+)
+select *
+from CTE_completed_employee_revenue
+;
+
+-- Day 19 question 2: Rank employees by completed revenue.
+
+with CTE_completed_employee_revenue as
+(
+    select
+    e.employee_id,
+    e.first_name||' '||e.last_name as full_name,
+    sum(o.order_amount) over(partition by e.employee_id) as emp_com_rev
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+)
+select
+employee_id,
+full_name,
+emp_com_rev,
+rank() over(order by emp_com_rev desc) as rank_emp_com_rev
+from CTE_completed_employee_revenue
+;
+
+
+-- Day 19 question 3: Calculate cumulative employee revenue.
+with CTE_completed_employee_running_revenue as
+(
+    select   
+    e.employee_id,
+    e.first_name||' '||e.last_name as full_name,
+    o.order_amount,
+    sum(o.order_amount) 
+    over(partition by e.employee_id 
+    order by o.order_timestamp) as running_employee_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+)
+select *
+from CTE_completed_employee_running_revenue
+;
+
+-- Day 19 question 4: Compare employee monthly performance.
+
+with CTE_completed_employee_monthly_revenue as
+(
+    select   
+    e.employee_id,
+    e.first_name||' '||e.last_name as full_name,
+    extract(month from o.order_timestamp) as order_month,
+    sum(o.order_amount) as monthly_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by e.employee_id, e.first_name||' '||e.last_name, 
+    extract(month from o.order_timestamp)
+)
+select
+employee_id,
+full_name,
+order_month,
+monthly_revenue,
+sum(monthly_revenue) 
+over(partition by employee_id order by order_month) as emp_running_ttl
+from CTE_completed_employee_monthly_revenue
+;
+
+-- Day 19 question 5: Identify consistent top performers.
+with CTE_completed_employee_monthly_revenue as
+(
+    select   
+    e.employee_id,
+    e.first_name||' '||e.last_name as full_name,
+    extract(month from o.order_timestamp) as order_month,
+    sum(o.order_amount) as monthly_revenue
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by e.employee_id, extract(month from o.order_timestamp)
+),
+CTE_completed_employee_monthly_revenue_rnk as
+(
+    select
+    employee_id,
+    full_name,
+    order_month,
+    monthly_revenue,
+    rank() 
+    over(partition by order_month order by monthly_revenue desc) as emp_mon_rank
+    from CTE_completed_employee_monthly_revenue
+)
+select *
+from CTE_completed_employee_monthly_revenue_rnk
+where emp_mon_rank <= 3
+order by order_month, emp_mon_rank
+;
+-- Michael Lee shows top 3 performance for 3 months within 4 months
+
+-- Day 19 question 6: Compare departments using employee data.
+
+with CTE_completed_employee_revenue as
+(
+    select     
+    e.employee_id,
+    e.department_id,
+    e.first_name||' '||e.last_name as full_name,
+    sum(o.order_amount) as emp_com_rev
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by e.employee_id, e.department_id, e.first_name, e.last_name
+)
+select
+department_id,
+sum(emp_com_rev) deparment_revenue 
+from CTE_completed_employee_revenue
+group by department_id
+;
+
+
+-- Day 19 question 7: Create employee performance segmentation.
+
+with CTE_completed_employee_revenue as
+(
+    select    
+    e.employee_id,
+    e.department_id,
+    e.first_name||' '||e.last_name as full_name,
+    sum(o.order_amount) as emp_com_rev
+    from orders o 
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by e.employee_id, e.department_id, e.first_name, e.last_name
+)
+select
+*,
+rank() 
+over(partition by department_id order by emp_com_rev desc) as rnk
+from CTE_completed_employee_revenue
+;
+
+-- Day 19 question 8: Find performance trends over time.
+
+with CTE_completed_revenue as
+(
+    select
+    order_timestamp,
+    order_amount,
+    round(((lag(order_amount) over(order by order_timestamp)-order_amount)
+    /order_amount)*100,2) as growth_trend
+    from orders    
+    where order_status = 'completed'
+)
+select *
+from CTE_completed_revenue
+;
+
+
+-- Day 19 question 9: Add business recommendations.
+
+-- Business recommendation 1:
+-- Reward and retain top-performing employees 
+-- because they generate the highest completed revenue.
+
+-- The business can use bonuses, recognition, 
+-- or promotion opportunities to keep them motivated.
+
+-- Business recommendation 2:
+-- Study the sales approach of employees who consistently rank in the 
+-- top 3 each month.
+
+-- Their communication style, customer handling, or selling process 
+-- can be shared with other team members.
+
+-- Business recommendation 3:
+-- Provide extra coaching or support to lower-performing employees.
+
+-- This can help improve overall department revenue and reduce the 
+-- performance gap between employees.
+
+-- Business recommendation 4:
+-- Compare department-level revenue to identify which teams contribute 
+-- most to business performance.
+
+-- High-performing departments can become internal benchmarks for other 
+-- departments.
+
+-- Business recommendation 5:
+-- Monitor revenue trends over time to quickly identify drops in completed 
+-- order revenue.
+
+-- If revenue decreases, management should investigate possible causes such 
+-- as customer demand, employee availability, or sales process issues.
+
+-- Day 19 question 10: Create final business summary comments.
+
+-- Final business summary:
+-- This employee performance analysis helps the business understand which 
+-- employees and departments generate the most completed revenue.
+
+-- The analysis identified total employee revenue, employee rankings, 
+-- cumulative revenue, monthly performance, consistent top performers, 
+-- department revenue, performance segments, and revenue trends over time.
+
+-- These insights can help management make better decisions about rewards, 
+-- training, staffing, and performance improvement.
+
+-- Overall, the business should focus on retaining top performers, 
+-- supporting low performers, and using monthly performance trends to monitor business momentum.
+
 
 ---
 

@@ -166,6 +166,37 @@ Business insights learned:
 - How rolling averages smooth business trends
 - How departments contribute differently to revenue growth
 - How customer spending changes across time periods
+
+## Day 19 – Employee Performance Mini Project
+
+### Skills Practiced
+- CTEs
+- Window Functions
+- RANK()
+- Running Totals
+- Revenue Trend Analysis
+- Employee Segmentation
+- Department Performance Analysis
+
+### Business Questions Solved
+1. Create employee revenue CTE
+2. Rank employees by completed revenue
+3. Calculate cumulative employee revenue
+4. Compare employee monthly performance
+5. Identify consistent top performers
+6. Compare departments using employee data
+7. Create employee performance segmentation
+8. Find performance trends over time
+9. Add business recommendations
+10. Create final business summary comments
+
+### Key Business Insights
+- Top-performing employees consistently drive most revenue.
+- Monthly ranking helps identify stable high performers.
+- Department-level analysis highlights strong and weak teams.
+- Revenue trend analysis helps detect business momentum changes.
+- Employee segmentation supports better coaching and reward strategies.
+
 ---
 
 ## 📈 Key Learning Outcomes
