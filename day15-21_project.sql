@@ -782,11 +782,12 @@ with CTE_completed_employee_revenue as
     select
     e.employee_id,
     e.first_name||' '||e.last_name as full_name,
-    sum(o.order_amount) over(partition by e.employee_id) as emp_com_rev
+    sum(o.order_amount) as emp_com_rev
     from orders o 
     join employees e
     on e.employee_id = o.employee_id
     where o.order_status = 'completed'
+    group by e.employee_id, e.first_name, e.last_name
 )
 select
 employee_id,
@@ -986,22 +987,172 @@ from CTE_completed_revenue
 -- training, staffing, and performance improvement.
 
 -- Overall, the business should focus on retaining top performers, 
--- supporting low performers, and using monthly performance trends to monitor business momentum.
+-- supporting low performers, and using monthly performance trends to
+-- monitor business momentum.
 
 
 ---
 
-## Day 20 — Customer Analytics Mini Project
-1. Create customer spending CTE.
-2. Segment customers into Low / Medium / High.
-3. Rank top customers.
-4. Calculate cumulative customer spending.
-5. Analyze repeat customers.
-6. Find highest monthly spending customers.
-7. Compare customer growth trends.
-8. Identify top revenue contributors.
-9. Add customer behavior insights.
-10. Create final business summary.
+
+-- Day 20 — Customer Analytics Mini Project
+-- Day 20 question 1: Create customer spending CTE.
+with CTE_completed_customer_spending as 
+(
+    select    
+    customer_name,
+    sum(order_amount) as customer_spending
+    from orders
+    where order_status = 'completed'
+    group by customer_name
+)
+select *
+from CTE_completed_customer_spending
+;
+-- Day 20 question 2: Segment customers into Low / Medium / High.
+with CTE_completed_customer_spending as 
+(
+    select    
+    customer_name,
+    sum(order_amount) as customer_spending
+    from orders
+    where order_status = 'completed'
+    group by customer_name
+)
+select *,
+case
+    when customer_spending < 500 then 'Low spender'
+    when customer_spending between 500 and 799.99 then 'Medium spender'
+    else 'High spender'
+end as customer_category
+from CTE_completed_customer_spending
+;
+
+
+-- Day 20 question 3: Rank top customers.
+
+with CTE_completed_customer_spending as 
+(
+    select    
+    customer_name,
+    sum(order_amount) as customer_spending
+    from orders
+    where order_status = 'completed'
+    group by customer_name
+)
+select *,
+case
+    when customer_spending < 500 then 'Low spender'
+    when customer_spending between 500 and 799.99 then 'Medium spender'
+    else 'High spender'
+end as customer_category,
+rank() over(order by customer_spending desc ) as customer_spending_rank
+from CTE_completed_customer_spending
+;
+-- Day 20 question 4: Calculate cumulative customer spending.
+
+select    
+customer_name,
+order_timestamp,
+sum(order_amount) 
+over(partition by customer_name order by order_timestamp)
+as cumulative_customer_spending
+from orders
+where order_status = 'completed'
+;
+
+-- Day 20 question 5: Analyze repeat customers.
+
+select
+customer_name,
+count(order_id) as total_orders,
+sum(order_amount) as total_spending,
+avg(order_amount) as avg_order_amount
+from orders
+where order_status = 'completed'
+group by customer_name
+having count(order_id) > 1
+order by total_spending desc
+;
+
+-- Day 20 question 6: Find highest monthly spending customers.
+
+with CTE_completed_customer_monthly_spending as
+(
+    select    
+    customer_name,
+    extract(month from order_timestamp) as order_month,
+    sum(order_amount) as customer_spending
+    from orders
+    where order_status = 'completed'
+    group by customer_name, extract(month from order_timestamp)
+),
+CTE_completed_customer_monthly_spending_rank as 
+(
+    select
+    customer_name,
+    order_month,
+    customer_spending,
+    rank() over(partition by order_month order by customer_spending desc) monthly_rank
+    from CTE_completed_customer_monthly_spending
+)
+select *
+from CTE_completed_customer_monthly_spending_rank
+where monthly_rank = 1
+;
+
+-- Day 20 question 7: Compare customer growth trends.
+
+with CTE_spending as
+(
+    select    
+    customer_name,
+    order_timestamp,
+    sum(order_amount) 
+    over(partition by customer_name 
+    order by order_timestamp)as customer_spending
+    from orders
+    where order_status = 'completed'
+),
+CTE_spending_growth as(
+    select
+    customer_name,
+    customer_spending,
+    lag(customer_spending) 
+    over(partition by customer_name) as previous_order
+    from CTE_spending
+    )
+select 
+customer_name,
+round(((customer_spending-previous_order)/nullif(previous_order,0))*100,2) 
+as customer_growth
+from CTE_spending_growth
+;
+
+-- Day 20 question 8: Identify top revenue contributors.
+-- After few analisus 
+-- Daniel R., Kevin H., Sara L., Mint A., Ploy K., Jane C. 
+-- are top revenue contributors.
+
+
+
+-- Day 20 question 9: Add customer behavior insights.
+
+-- From previous analysis, top 5 spending customers are Daniel R., Kevin H.
+-- Sara L., Mint A., Ploy K. And highest monthly spending customers are 
+-- Mint A., Jane C., Sara L., Daniel R. and their growth trends are postive
+-- growth by time. We should focus on these high-value customers. Provide them 
+-- specified sevice and supports
+
+
+-- Day 20 question 10: Create final business summary.
+
+-- After evaluating the key metrics, we do identify few high-value customers
+-- their behaviour seems to increase order amount by time. Besides offering
+-- additional service support,the business should survey high-value customers
+-- to understand their needs.
+-- For examaple, we should seek their demand that we have not provided. Or
+-- any products they are interested in.
+
 
 ---
 

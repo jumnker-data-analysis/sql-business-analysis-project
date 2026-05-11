@@ -190,12 +190,44 @@ Business insights learned:
 9. Add business recommendations
 10. Create final business summary comments
 
+
+
 ### Key Business Insights
 - Top-performing employees consistently drive most revenue.
 - Monthly ranking helps identify stable high performers.
 - Department-level analysis highlights strong and weak teams.
 - Revenue trend analysis helps detect business momentum changes.
 - Employee segmentation supports better coaching and reward strategies.
+
+## Day 20 – Customer Analytics Mini Project
+
+### Topics practiced:
+- Customer spending CTE
+- Customer segmentation
+- Customer spending ranking
+- Cumulative customer spending
+- Repeat customer analysis
+- Highest monthly spending customers
+- Customer growth trend analysis
+- Customer behavior insights
+- Final business summary
+
+### Key SQL concepts:
+- CTE
+- CASE WHEN
+- RANK()
+- SUM() OVER()
+- LAG()
+- PARTITION BY
+- HAVING
+- Customer segmentation
+
+### Business insights learned:
+- How to identify high-value customers
+- How to separate low, medium, and high spenders
+- How to detect repeat customers
+- How customer spending changes over time
+- How SQL can support customer retention and marketing decisions
 
 ---
 
