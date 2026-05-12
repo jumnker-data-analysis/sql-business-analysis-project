@@ -1156,17 +1156,244 @@ from CTE_spending_growth
 
 ---
 
-## Day 21 — Revenue Trend Dashboard Queries
-1. Build monthly revenue table.
-2. Build monthly order count table.
-3. Compare revenue growth rates.
-4. Create running revenue dashboard query.
-5. Compare department monthly trends.
-6. Rank monthly performance.
-7. Find strongest growth periods.
-8. Find weakest months.
-9. Add executive-style business insights.
-10. Organize queries into dashboard sections.
+-- Day 21 — Revenue Trend Dashboard Queries
+-- ================================================================
+-- Section 1: Monthly Revenue KPI Dashboard
+-- ================================================================
+-- Day 21 question 1: Build monthly revenue table.
+
+select
+extract(month from order_timestamp) as order_month,
+sum(order_amount) as monthly_revenue
+from orders o
+where order_status = 'completed'
+group by extract(month from order_timestamp)
+;
+
+-- Day 21 question 2: Build monthly order count table.
+
+select
+extract(month from order_timestamp) as order_month,
+count(order_amount) as monthly_ordercount
+from orders o
+where order_status = 'completed'
+group by extract(month from order_timestamp)
+;
+
+-- ================================================================
+-- Section 2: Revelue Growth Analysis
+-- ================================================================
+-- Day 21 question 3: Compare revenue growth rates.
+with CTE_completed_monthly_revenue as 
+(
+    select
+    extract(month from order_timestamp) as order_month,
+    sum(order_amount) as monthly_revenue
+    from orders o
+    where order_status = 'completed'
+    group by extract(month from order_timestamp)
+),
+CTE_completed_monthly_revenue_growth as
+(
+select
+order_month,
+monthly_revenue,
+lag(monthly_revenue) over(order by order_month) as previous_monthly_revenue
+from CTE_completed_monthly_revenue
+)
+
+select
+order_month,
+monthly_revenue,
+previous_monthly_revenue,
+round(((monthly_revenue-previous_monthly_revenue)/
+nullif(previous_monthly_revenue,0))*100,2) mom_growth
+from CTE_completed_monthly_revenue_growth
+;
+
+-- Day 21 question 4: Create running revenue dashboard query.
+
+with CTE_completed_monthly_revenue as 
+(
+    select
+    extract(month from order_timestamp) as order_month,
+    sum(order_amount) as monthly_revenue
+    from orders o
+    where order_status = 'completed'
+    group by extract(month from order_timestamp)
+),
+CTE_completed_monthly_revenue_growth as
+(
+    select    
+    order_month,
+    monthly_revenue,
+    lag(monthly_revenue) 
+    over(order by order_month) as previous_monthly_revenue
+    from CTE_completed_monthly_revenue
+)
+select
+order_month,
+monthly_revenue,
+sum(monthly_revenue) 
+over(order by order_month) as monthly_running_revenue,
+round(((monthly_revenue-previous_monthly_revenue)/
+nullif(previous_monthly_revenue,0))*100,2) mom_growth
+from CTE_completed_monthly_revenue_growth
+;
+
+-- ================================================================
+-- Section 3: Department Performance Trends
+-- ================================================================
+
+-- Day 21 question 5: Compare department monthly trends.
+with CTE_completed_monthly_revenue as 
+(
+    select
+    e.department_id,
+    extract(month from o.order_timestamp) as order_month,
+    sum(o.order_amount) as monthly_revenue
+    from orders o
+    join employees e
+    on e.employee_id = o.employee_id
+    where o.order_status = 'completed'
+    group by e.department_id, extract(month from o.order_timestamp)
+),
+CTE_completed_monthly_revenue_growth as
+(
+    select
+    department_id,
+    order_month,
+    monthly_revenue,
+    lag(monthly_revenue) over(partition by department_id order by order_month) as previous_monthly_revenue
+    from CTE_completed_monthly_revenue
+)
+select
+department_id,
+order_month,
+monthly_revenue,
+sum(monthly_revenue) over(partition by department_id order by order_month) as monthly_running_revenue,
+round(((monthly_revenue-previous_monthly_revenue)/
+nullif(previous_monthly_revenue,0))*100,2) mom_growth
+from CTE_completed_monthly_revenue_growth
+;
+
+-- Day 21 question 6: Rank monthly performance.
+
+with CTE_completed_monthly_revenue as 
+(
+    select
+    extract(month from order_timestamp) as order_month,
+    sum(order_amount) as monthly_revenue
+    from orders o
+    where order_status = 'completed'
+    group by extract(month from order_timestamp)
+),
+CTE_completed_monthly_revenue_growth as
+(
+    select    
+    order_month,
+    monthly_revenue,
+    lag(monthly_revenue) over(order by order_month) as previous_monthly_revenue
+    from CTE_completed_monthly_revenue
+)
+select
+order_month,
+monthly_revenue,
+rank() over(order by monthly_revenue desc) as monthly_rank,
+sum(monthly_revenue) over(order by order_month) as monthly_running_revenue,
+round(((monthly_revenue-previous_monthly_revenue)/
+nullif(previous_monthly_revenue,0))*100,2) mom_growth
+from CTE_completed_monthly_revenue_growth
+;
+
+
+-- ================================================================
+-- Section 4: Growth & Weakness Detection
+-- ================================================================
+
+-- Day 21 question 7: Find strongest growth periods.
+with CTE_completed_monthly_revenue as 
+(   select
+    extract(month from order_timestamp) as order_month,
+    sum(order_amount) as monthly_revenue
+    from orders o
+    where order_status = 'completed'
+    group by extract(month from order_timestamp)
+),
+CTE_completed_monthly_revenue_growth as
+(   select    
+    order_month,
+    monthly_revenue,
+    lag(monthly_revenue) over(order by order_month) as previous_monthly_revenue
+    from CTE_completed_monthly_revenue
+)
+select 
+order_month,
+mom_growth,
+rank() over(order by mom_growth desc) as monthly_growth_rank
+from
+(   select
+    order_month,
+    monthly_revenue,
+    sum(monthly_revenue) over(order by order_month) as monthly_running_revenue,
+    round(((monthly_revenue-previous_monthly_revenue)/nullif(previous_monthly_revenue,0))*100,2) as mom_growth
+    from CTE_completed_monthly_revenue_growth
+)
+where mom_growth is not null order by mom_growth desc limit 1
+;
+
+
+-- Day 21 question 8: Find weakest months.
+with CTE_completed_monthly_revenue as 
+(   select
+    extract(month from order_timestamp) as order_month,
+    sum(order_amount) as monthly_revenue
+    from orders o
+    where order_status = 'completed'
+    group by extract(month from order_timestamp)
+),
+CTE_completed_monthly_revenue_growth as
+(   select    
+    order_month,
+    monthly_revenue,
+    lag(monthly_revenue) over(order by order_month) as previous_monthly_revenue
+    from CTE_completed_monthly_revenue
+)
+
+select 
+order_month,
+mom_growth,
+rank() over(order by mom_growth) as monthly_growth_rank
+from
+(   select
+    order_month,
+    monthly_revenue,
+    sum(monthly_revenue) over(order by order_month) as monthly_running_revenue,
+    round(((monthly_revenue-previous_monthly_revenue)/nullif(previous_monthly_revenue,0))*100,2) as mom_growth
+    from CTE_completed_monthly_revenue_growth
+)
+where mom_growth is not null order by mom_growth limit 1
+;
+
+-- ================================================================
+-- Section 5: Executive Business Insights
+-- ================================================================
+
+-- Day 21 question 9: Add executive-style business insights.
+
+-- Monthly revenue started strongly in Month 1 with 3602.97 revenue.
+-- Revenue dropped significantly in Month 2 by -30.48%.
+-- Month 3 recovered slightly with positive 2.36% growth.
+-- Month 4 experienced the weakest business performance with -80.58% growth.
+
+-- Department 1 and Department 5 showed strong cumulative revenue growth.
+-- Department 3 consistently underperformed compared with other departments.
+-- Department 5 showed the strongest late-period recovery with 176.97% growth.
+
+-- Based on the dashboard analysis, the business currently shows unstable
+-- monthly performance and requires stronger revenue consistency strategies.
+
+-- Day 21 question 10: Organize queries into dashboard sections.
 
 ---
 

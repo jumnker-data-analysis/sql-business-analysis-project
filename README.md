@@ -229,6 +229,43 @@ Business insights learned:
 - How customer spending changes over time
 - How SQL can support customer retention and marketing decisions
 
+## Day 21 — Revenue Trend Dashboard Queries
+
+Today focused on building dashboard-style SQL analytics using CTEs, window functions, ranking logic, and revenue trend analysis.
+
+### Topics Practiced
+- Monthly revenue aggregation
+- Monthly order count analysis
+- Revenue growth rate calculations
+- Running revenue dashboards
+- Department monthly trend comparisons
+- Monthly performance ranking
+- Strongest revenue growth period detection
+- Weakest month identification
+- Executive-style business insights
+- Dashboard query organization
+
+### SQL Concepts Used
+- CTE (Common Table Expressions)
+- Window Functions
+- LAG()
+- SUM() OVER()
+- RANK()
+- Running Totals
+- Month-over-Month (MoM) Growth
+- Revenue KPI Analysis
+- Department Trend Analysis
+
+### Key Business Insights
+- Month 1 generated the highest revenue performance.
+- Month 4 showed the weakest revenue growth.
+- Revenue trends fluctuated significantly across months.
+- Department 1 and Department 5 showed stronger cumulative growth.
+- Dashboard queries were organized into executive reporting sections.
+
+### Portfolio Progress
+This day focused on transforming SQL practice into dashboard-style analytical reporting similar to real business intelligence workflows.
+
 ---
 
 ## 📈 Key Learning Outcomes
