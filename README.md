@@ -266,6 +266,47 @@ Today focused on building dashboard-style SQL analytics using CTEs, window funct
 ### Portfolio Progress
 This day focused on transforming SQL practice into dashboard-style analytical reporting similar to real business intelligence workflows.
 
+# SQL Learning Portfolio
+
+## Overview
+This repository contains my daily SQL practice projects using PostgreSQL.
+
+The projects focus on:
+- CTEs
+- Window Functions
+- Business Analysis
+- Revenue Dashboards
+- Customer Analytics
+
+## Skills Practiced
+- Aggregation
+- JOINs
+- CASE statements
+- Window Functions
+- Running Totals
+- MoM Growth Analysis
+- Ranking Functions
+
+## Featured Projects
+
+### Day 20 — Customer Analytics
+- Customer segmentation
+- Customer growth trends
+- Revenue contribution analysis
+
+### Day 21 — Revenue Trend Dashboard
+- Monthly revenue KPIs
+- Running revenue dashboard
+- Department trend analysis
+- Growth period analysis
+
+## Tools
+- PostgreSQL
+- VS Code
+
+## Goal
+Building real-world SQL analysis skills for data analyst opportunities.
+
 ---
 
 ## 📈 Key Learning Outcomes

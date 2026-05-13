@@ -1198,7 +1198,8 @@ CTE_completed_monthly_revenue_growth as
 select
 order_month,
 monthly_revenue,
-lag(monthly_revenue) over(order by order_month) as previous_monthly_revenue
+lag(monthly_revenue) 
+over(order by order_month) as previous_monthly_revenue
 from CTE_completed_monthly_revenue
 )
 
@@ -1264,14 +1265,16 @@ CTE_completed_monthly_revenue_growth as
     department_id,
     order_month,
     monthly_revenue,
-    lag(monthly_revenue) over(partition by department_id order by order_month) as previous_monthly_revenue
+    lag(monthly_revenue) 
+    over(partition by department_id order by order_month) as previous_monthly_revenue
     from CTE_completed_monthly_revenue
 )
 select
 department_id,
 order_month,
 monthly_revenue,
-sum(monthly_revenue) over(partition by department_id order by order_month) as monthly_running_revenue,
+sum(monthly_revenue) 
+over(partition by department_id order by order_month) as monthly_running_revenue,
 round(((monthly_revenue-previous_monthly_revenue)/
 nullif(previous_monthly_revenue,0))*100,2) mom_growth
 from CTE_completed_monthly_revenue_growth
@@ -1293,14 +1296,16 @@ CTE_completed_monthly_revenue_growth as
     select    
     order_month,
     monthly_revenue,
-    lag(monthly_revenue) over(order by order_month) as previous_monthly_revenue
+    lag(monthly_revenue) 
+    over(order by order_month) as previous_monthly_revenue
     from CTE_completed_monthly_revenue
 )
 select
 order_month,
 monthly_revenue,
 rank() over(order by monthly_revenue desc) as monthly_rank,
-sum(monthly_revenue) over(order by order_month) as monthly_running_revenue,
+sum(monthly_revenue) 
+over(order by order_month) as monthly_running_revenue,
 round(((monthly_revenue-previous_monthly_revenue)/
 nullif(previous_monthly_revenue,0))*100,2) mom_growth
 from CTE_completed_monthly_revenue_growth
@@ -1324,7 +1329,8 @@ CTE_completed_monthly_revenue_growth as
 (   select    
     order_month,
     monthly_revenue,
-    lag(monthly_revenue) over(order by order_month) as previous_monthly_revenue
+    lag(monthly_revenue) 
+    over(order by order_month) as previous_monthly_revenue
     from CTE_completed_monthly_revenue
 )
 select 
@@ -1335,8 +1341,10 @@ from
 (   select
     order_month,
     monthly_revenue,
-    sum(monthly_revenue) over(order by order_month) as monthly_running_revenue,
-    round(((monthly_revenue-previous_monthly_revenue)/nullif(previous_monthly_revenue,0))*100,2) as mom_growth
+    sum(monthly_revenue) 
+    over(order by order_month) as monthly_running_revenue,
+    round(((monthly_revenue-previous_monthly_revenue)/
+    nullif(previous_monthly_revenue,0))*100,2) as mom_growth
     from CTE_completed_monthly_revenue_growth
 )
 where mom_growth is not null order by mom_growth desc limit 1
@@ -1356,7 +1364,8 @@ CTE_completed_monthly_revenue_growth as
 (   select    
     order_month,
     monthly_revenue,
-    lag(monthly_revenue) over(order by order_month) as previous_monthly_revenue
+    lag(monthly_revenue) 
+    over(order by order_month) as previous_monthly_revenue
     from CTE_completed_monthly_revenue
 )
 
@@ -1368,8 +1377,10 @@ from
 (   select
     order_month,
     monthly_revenue,
-    sum(monthly_revenue) over(order by order_month) as monthly_running_revenue,
-    round(((monthly_revenue-previous_monthly_revenue)/nullif(previous_monthly_revenue,0))*100,2) as mom_growth
+    sum(monthly_revenue) 
+    over(order by order_month) as monthly_running_revenue,
+    round(((monthly_revenue-previous_monthly_revenue)/
+    nullif(previous_monthly_revenue,0))*100,2) as mom_growth
     from CTE_completed_monthly_revenue_growth
 )
 where mom_growth is not null order by mom_growth limit 1
@@ -1397,14 +1408,111 @@ where mom_growth is not null order by mom_growth limit 1
 
 ---
 
-## Day 22 — Portfolio Optimization + Refactoring
-1. Rewrite an old query using CTE.
-2. Rewrite a subquery using window functions.
-3. Improve alias naming consistency.
-4. Improve query readability and spacing.
-5. Reduce duplicated logic.
-6. Add professional SQL comments.
-7. Add business insights sections.
-8. Create recruiter-friendly README notes.
-9. Organize SQL files professionally.
-10. Select best portfolio queries for GitHub.
+-- Day 22 — Portfolio Optimization + Refactoring
+-- Day 22 question 1: Rewrite an old query using CTE.
+
+
+-- Average completed order value by department.
+with CTE_completed_department as
+(
+    select 
+    d.department_name,
+    e.employee_id,
+    e.first_name,
+    e.last_name,
+    o.order_amount
+    from orders o
+    inner join employees e
+    on e.employee_id = o.employee_id
+    inner join departments d
+    on d.department_id = e.department_id
+    where o.order_status = 'completed'
+)
+select
+department_name,
+avg(order_amount)
+from CTE_completed_department
+group by department_name
+;
+
+
+
+
+-- Day 22 question 2: Rewrite a subquery using window functions.
+-- Find customers whose spending is higher 
+-- than the average customer spending.
+
+select 
+o.customer_name,
+sum(o.order_amount) as customer_spending
+from orders o
+group by customer_name
+having sum(o.order_amount) > 
+(
+    select avg(customer_total)
+    from
+    (
+        select 
+        distinct
+        customer_name, 
+        sum(order_amount) 
+        over(partition by customer_name) as customer_total
+        from orders        
+    ) as customer_totals
+)
+;
+
+select 
+o.customer_name,
+sum(o.order_amount) as customer_spending
+from orders o
+group by customer_name
+having sum(o.order_amount) > 
+(
+    select avg(customer_total)
+    from
+    (
+        select customer_name, 
+        sum(order_amount) as customer_total
+        from orders
+        group by customer_name
+    ) as customer_totals
+)
+;
+
+-- Day 22 question 3: Improve alias naming consistency.
+-- done
+-- Day 22 question 4: Improve query readability and spacing.
+-- done
+-- Day 22 question 5: Reduce duplicated logic.
+-- done
+-- Day 22 question 6: Add professional SQL comments.
+-- done
+-- Day 22 question 7: Add business insights sections.
+-- done
+
+-- Day 22 question 8: Create recruiter-friendly README notes.
+
+-- Day 22 question 9: Organize SQL files professionally.
+
+-- Day 22 question 10: Select best portfolio queries for GitHub.
+-- It would be Rank top customers.
+
+with CTE_completed_customer_spending as 
+(
+    select    
+    customer_name,
+    sum(order_amount) as customer_spending
+    from orders
+    where order_status = 'completed'
+    group by customer_name
+)
+select *,
+case
+    when customer_spending < 500 then 'Low spender'
+    when customer_spending between 500 and 799.99 then 'Medium spender'
+    else 'High spender'
+end as customer_category,
+rank() over(order by customer_spending desc ) as customer_spending_rank
+from CTE_completed_customer_spending
+;
