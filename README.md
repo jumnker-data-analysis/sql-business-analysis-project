@@ -307,6 +307,78 @@ The projects focus on:
 ## Goal
 Building real-world SQL analysis skills for data analyst opportunities.
 
+## Day 22 — Portfolio Optimization + Refactoring
+
+### Topics Practiced
+- Refactoring old SQL queries using CTEs
+- Rewriting subqueries with window functions
+- Improving query readability and formatting
+- Reducing duplicated SQL logic
+- Writing recruiter-friendly SQL comments
+- Organizing SQL projects professionally
+- Selecting portfolio-quality SQL queries
+
+### Key Skills
+- CTE optimization
+- Window Functions
+- SQL readability
+- Professional SQL formatting
+- GitHub portfolio structuring
+- Business-focused SQL presentation
+
+# Brazil Ecommerce Business Analysis Project (Olist Dataset)
+
+## Project Overview
+This project analyzes Brazil ecommerce business performance using PostgreSQL and the Olist Ecommerce Dataset.
+
+The goal of this project is to simulate real-world business analysis workflows including:
+- revenue analysis
+- customer analytics
+- delivery performance analysis
+- KPI tracking
+- dashboard-ready SQL development
+- executive business insights
+
+---
+
+## Day 23 Progress — Project Initialization
+
+### Completed Tasks
+- Imported ecommerce CSV datasets into PostgreSQL
+- Explored table structures and relationships
+- Identified primary business flow between customers, orders, payments, and order items
+- Built initial SQL JOIN queries
+- Organized project folders and SQL workflow
+
+### Current Dataset Tables
+- customers
+- orders
+- order_items
+- order_payments
+
+---
+
+## Main Business Questions
+- Which months generate the highest revenue?
+- Which customers contribute the most revenue?
+- What are the delivery and payment trends?
+- Which product orders generate the highest sales value?
+- How can SQL support dashboard-style business analysis?
+
+---
+
+## Tools Used
+- PostgreSQL
+- pgAdmin 4
+- VS Code
+- SQL
+- GitHub
+
+---
+
+## Project Goal
+Transform raw ecommerce data into business insights and portfolio-ready SQL analytics projects.
+
 ---
 
 ## 📈 Key Learning Outcomes
