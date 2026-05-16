@@ -379,6 +379,46 @@ The goal of this project is to simulate real-world business analysis workflows i
 ## Project Goal
 Transform raw ecommerce data into business insights and portfolio-ready SQL analytics projects.
 
+## Day 24 — Data Cleaning + Validation
+
+### Overview
+Today focused on preparing clean and analysis-ready ecommerce data using PostgreSQL before starting KPI and business analysis.
+
+### Tasks Completed
+- Checked table row counts
+- Validated NULL values
+- Investigated missing delivery dates
+- Checked duplicate records
+- Analyzed order status distribution
+- Analyzed payment method distribution
+- Built cleaned CTE datasets
+- Created first analysis-ready JOIN dataset
+
+---
+
+### SQL Concepts Practiced
+- COUNT()
+- GROUP BY
+- HAVING
+- IS NULL
+- CTE (Common Table Expressions)
+- JOIN
+- Basic revenue validation
+
+---
+
+### Key Business Insights
+- Most orders were successfully delivered
+- Credit card was the dominant payment method
+- Some orders contained missing delivery dates
+- Cancelled orders should be excluded from revenue analysis
+- Clean datasets are essential before business reporting
+
+---
+
+### Project Progress
+This stage focused on transforming raw ecommerce data into structured and analysis-ready datasets for future KPI dashboards and business intelligence analysis.
+
 ---
 
 ## 📈 Key Learning Outcomes
