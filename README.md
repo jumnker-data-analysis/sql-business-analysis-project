@@ -419,45 +419,57 @@ Today focused on preparing clean and analysis-ready ecommerce data using Postgre
 ### Project Progress
 This stage focused on transforming raw ecommerce data into structured and analysis-ready datasets for future KPI dashboards and business intelligence analysis.
 
-## Day 24 — Data Cleaning + Validation
+## Day 25 — Revenue KPI Analysis
 
 ### Overview
-Today focused on preparing clean and analysis-ready ecommerce data using PostgreSQL before starting KPI and business analysis.
+Today focused on building core business KPI analysis queries using PostgreSQL and the Brazil Ecommerce (Olist) dataset.
+
+The analysis explored:
+- total revenue
+- average order value
+- monthly revenue trends
+- payment method performance
+- state-level revenue analysis
+- seller revenue performance
+
+---
 
 ### Tasks Completed
-- Checked table row counts
-- Validated NULL values
-- Investigated missing delivery dates
-- Checked duplicate records
-- Analyzed order status distribution
-- Analyzed payment method distribution
-- Built cleaned CTE datasets
-- Created first analysis-ready JOIN dataset
+- Calculated total business revenue
+- Calculated average order value
+- Analyzed revenue by payment type
+- Built monthly revenue trend queries
+- Compared revenue by customer state
+- Identified top-performing sellers
+- Analyzed freight and shipping costs
+- Built first KPI-focused CTE queries
 
 ---
 
 ### SQL Concepts Practiced
-- COUNT()
+- SUM()
+- AVG()
 - GROUP BY
-- HAVING
-- IS NULL
-- CTE (Common Table Expressions)
+- ORDER BY
+- EXTRACT()
 - JOIN
-- Basic revenue validation
+- CTE (Common Table Expressions)
+- Revenue aggregation
 
 ---
 
 ### Key Business Insights
-- Most orders were successfully delivered
-- Credit card was the dominant payment method
-- Some orders contained missing delivery dates
-- Cancelled orders should be excluded from revenue analysis
-- Clean datasets are essential before business reporting
+- Credit card payments generated the highest revenue contribution
+- Revenue performance varied across months
+- Some states contributed significantly higher sales volume
+- Seller performance distribution was uneven
+- Freight costs represented an important operational expense
 
 ---
 
 ### Project Progress
-This stage focused on transforming raw ecommerce data into structured and analysis-ready datasets for future KPI dashboards and business intelligence analysis.
+This stage focused on transforming raw ecommerce transaction data into business KPI metrics and dashboard-style analytical queries.
+
 
 ---
 
