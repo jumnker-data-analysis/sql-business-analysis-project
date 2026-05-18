@@ -188,3 +188,125 @@ LIMIT 50;
 -- 2. Credit card is the dominant payment methed.
 -- 3. Some orders have missing delivery dates.
 -- 4. Canceled orders should be excluded from revenue analysis.
+
+
+
+-- Day 25: Revenue KPI Analysis
+
+-- step 1: Total Revenue:
+
+select 
+round(sum(payment_value),2) as total_revenue
+from order_payments
+;
+-- Total Business Revenue 
+-- step 2: Average Order Value:
+
+select 
+round(avg(payment_value),2) as avg_order_value
+from order_payments
+;
+-- Average customer spending per order 
+
+-- step 3: Revenue by Payment Type:
+
+select 
+payment_type,
+round(sum(payment_value),2) as total_revenue,
+count(*)
+from order_payments
+group by payment_type
+order by total_revenue desc
+;
+-- Credit card dominate revenue
+
+-- step 4: Monthly Revenue Trend:
+
+select
+extract(month from o.order_purchase_timestamp) as order_month,
+round(sum(p.payment_value),2) as monthly_revenue
+from orders o 
+join order_payments p
+    on o.order_id = p.order_id
+group by extract(month from o.order_purchase_timestamp)
+order by order_month asc
+;
+--
+
+-- step 5: Revenue by State:
+
+select
+c.customer_state,
+round(sum(p.payment_value),2) as total_revenue
+from customers c
+join orders o 
+    on c.customer_id = o.customer_id
+join order_payments p
+    on o.order_id = p.order_id
+group by c.customer_state
+order by total_revenue desc
+limit 10
+;
+-- State SP generated the most revenue
+
+-- step 6: Top Customers:
+
+select
+c.customer_unique_id,
+round(sum(p.payment_value),2) as total_spending
+from customers c
+join orders o 
+    on c.customer_id = o.customer_id
+join order_payments p
+    on o.order_id = p.order_id
+group by c.customer_unique_id
+order by total_spending desc
+limit 10
+;
+-- The Top 10 Contribution customers
+
+-- step 7: Top Sellers
+
+select
+seller_id,
+round(sum(price),2) as seller_revenue
+from order_items
+group by seller_id
+order by seller_revenue desc
+limit 10
+;
+-- The Top 10 Performance Sellers
+
+-- step 8: Revenue + Freight Analysis
+
+select 
+round(sum(price),2) as product_revenue,
+round(sum(freight_value),2) as total_shipping_cost
+from order_items
+;
+
+-- step 9: First KPI CTE
+
+with monthly_kpi as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue,
+        count(distinct o.order_id) as total_orders
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by order_month
+)
+select *
+from monthly_kpi
+order by order_month
+;
+
+-- step 10: Business Insights:
+
+-- Credit cards generate most business revenue.
+-- Revenue varies significantly by month.
+-- Some states contribute much higher sales volumn.
+-- High-Value customers contribute disproportionately to revenue.
+-- Freight cost is a meaningful operational expense.
+
