@@ -470,6 +470,60 @@ The analysis explored:
 ### Project Progress
 This stage focused on transforming raw ecommerce transaction data into business KPI metrics and dashboard-style analytical queries.
 
+---
+
+## Day 26 — Customer Segmentation Analysis (Olist Ecommerce SQL Project)
+
+### Project Progress
+Today focused on customer segmentation analysis using PostgreSQL and the Brazil Olist Ecommerce dataset.
+
+### Skills Practiced
+- SQL aggregation
+- CASE WHEN segmentation
+- Customer behavior analysis
+- Revenue KPI analysis
+- Business insight reporting
+- GROUP BY analytics
+- Ecommerce customer segmentation
+
+### SQL Concepts Used
+- SUM()
+- COUNT()
+- AVG()
+- CASE WHEN
+- GROUP BY
+- ROUND()
+- CTEs
+
+### Business Questions Answered
+- Which customer segment generates the highest revenue?
+- How many customers belong to each spending category?
+- What is the average spending behavior by segment?
+- Which customer group provides the best long-term business opportunity?
+
+### Customer Segmentation Logic
+Customers were divided into:
+- Low Value Customers
+- Medium Value Customers
+- High Value Customers
+
+based on total customer spending behavior.
+
+### Key Business Insights
+- Most ecommerce revenue came from a large number of low-value customers.
+- High-value customers represented a small portion of the customer base but generated very high average spending.
+- Medium-value customers showed strong potential for upselling opportunities.
+- The ecommerce business currently operates on a high-volume customer model.
+- Customer retention strategies could significantly improve long-term profitability.
+
+### Tools Used
+- PostgreSQL
+- VS Code
+- pgAdmin
+- Olist Brazil Ecommerce Dataset
+
+### Project Progress
+This project is part of my 30-Day SQL & Data Analytics Portfolio Challenge focused on building real-world business analysis projects for data analyst roles.
 
 ---
 
