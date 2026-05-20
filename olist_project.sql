@@ -310,7 +310,7 @@ order by order_month
 -- High-Value customers contribute disproportionately to revenue.
 -- Freight cost is a meaningful operational expense.
 
-
+----------------------------------------------------
 -- Day 26 Customer Analytics
 
 -- Step 1: Top Customers by Spending
@@ -461,6 +461,202 @@ order by total_revenue desc
 -- 8. Credit card   
 
 ----------------------------------------------------
---
+-- Day 27 Delivery Performance Analysis
 ----------------------------------------------------
---
+-- Step 1: Check delivery-related columns
+
+select
+    order_id,
+    order_status,
+    order_purchase_timestamp,
+    order_delivered_customer_date,
+    order_estimated_delivery_date
+from orders
+limit 20
+;
+
+----------------------------------------------------
+-- Step 2:Count delivery status 
+
+select
+    order_status,
+    count(*) as total_orders
+from orders
+group by order_status
+order by total_orders
+;
+-- Most orders are delivered, but cancelled/unavailable orders should be
+-- excluded from delivery performance analysis
+
+----------------------------------------------------
+-- Step 3: Calculate delivery day
+
+select 
+    order_id,
+    order_status,
+    order_purchase_timestamp,
+    order_delivered_customer_date,
+    order_estimated_delivery_date,
+    round(
+        extract(epoch from 
+        (order_delivered_customer_date-order_purchase_timestamp))/86400,
+        2
+    ) as delivery_days
+from orders
+where order_delivered_customer_date is not null
+limit 20
+;
+
+----------------------------------------------------
+-- Step 4: Average delivery days
+
+select
+    round(
+        avg(extract(epoch from 
+        (order_delivered_customer_date-order_purchase_timestamp))/86400),
+        2
+    ) as avg_delivery_day
+from orders
+where order_status = 'delivered'
+and order_delivered_customer_date is not null
+;
+-- Average delivery day helps measure logistics efficiency
+
+----------------------------------------------------
+-- Step 5: On-time vs late delivery
+
+select 
+    case
+        when order_delivered_customer_date <= order_estimated_delivery_date
+        then 'On-time'
+        else 'Late'
+    end as delivery_status,
+    count(*) as total_orders
+from orders
+where order_status = 'delivered'
+and order_delivered_customer_date is not null
+and order_estimated_delivery_date is not null
+group by delivery_status
+order by total_orders desc
+;
+
+
+----------------------------------------------------
+-- Step 6: Late delivery rate
+
+select
+    count(*) as total_delivered_orders,
+    count(*) filter (
+    where order_delivered_customer_date > order_estimated_delivery_date
+    ) as late_orders,
+    round(
+    count(*) filter (
+    where order_delivered_customer_date > order_estimated_delivery_date
+    ) * 100.0 / count(*),
+    2
+    ) as late_delivery_rate
+from orders
+where order_status = 'delivered'
+and order_delivered_customer_date is not null
+and order_estimated_delivery_date is not null
+;
+-- Late delivery rate shows how often the business fails to meet
+-- customer expectations. 
+
+----------------------------------------------------
+-- Step 7: Delivery perfomance by customer state
+
+select
+    c.customer_state,
+    count(*) as delivered_orders,
+    round(
+        avg(extract(epoch from 
+        (o.order_delivered_customer_date-o.order_purchase_timestamp))/86400),
+        2
+    ) as avg_delivery_day,
+    round(
+        count(*) filter (
+            where o.order_delivered_customer_date > o.order_estimated_delivery_date
+        ) * 100.0 / count(*),
+        2
+    ) as late_delivery_rate
+from orders o 
+join customers c 
+    on o.customer_id = c.customer_id
+where o.order_status = 'delivered'
+and o.order_delivered_customer_date is not null
+and o.order_estimated_delivery_date is not null
+group by c.customer_state
+order by late_delivery_rate desc
+;
+
+
+----------------------------------------------------
+-- Step 8: Rank states by delivery speed
+
+with state_delivery as(
+    select
+        c.customer_state,
+        count(*) as delivered_orders,
+        round(
+            avg(extract(epoch from 
+            (o.order_delivered_customer_date-o.order_purchase_timestamp))/86400),
+            2
+        ) as avg_delivery_day
+    from orders o 
+    join customers c 
+        on o.customer_id = c.customer_id
+    where o.order_status = 'delivered'
+    and o.order_delivered_customer_date is not null
+    group by c.customer_state
+)
+select
+    customer_state,
+    delivered_orders,
+    avg_delivery_day,
+    rank() over(order by avg_delivery_day asc) as delivery_speed_rank
+from state_delivery
+order by delivery_speed_rank
+;
+
+----------------------------------------------------
+-- Step 9: Monthly delivery performance
+
+select
+    extract(month from order_purchase_timestamp) as order_month,
+    count(*) as delivered_orders,
+    round(
+        avg(extract(epoch from 
+        (order_delivered_customer_date - order_purchase_timestamp))/86400),
+        2
+    ) as avg_delivery_day,
+    round(
+        count(*) filter (
+            where order_delivered_customer_date > order_estimated_delivery_date
+        ) * 100.0 / count(*),
+        2
+    ) as late_delivery_rate
+from orders
+where order_status = 'delivered'
+and order_delivered_customer_date is not null
+and order_estimated_delivery_date is not null
+group by extract(month from order_purchase_timestamp)
+order by order_month
+;
+
+----------------------------------------------------
+
+-- Day 27 Business Insights:
+-- Delivery performance is a key operational KPI for ecommerce businesses.
+-- Average delivery days help evaluate logistics efficiency.
+-- Late delivery rate shows how often customer delivery expectations are not met.
+-- State-level delivery analysis can reveal geographic logistics challenges.
+-- Monthly delivery trends help identify whether logistics performance
+-- improves or worsens over time.
+-- Faster delivery regions may indicate stronger logistics coverage, while
+-- slower regions may need operational improvement.
+
+----------------------------------------------------
+
+
+

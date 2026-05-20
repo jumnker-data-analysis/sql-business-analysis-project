@@ -526,6 +526,62 @@ based on total customer spending behavior.
 This project is part of my 30-Day SQL & Data Analytics Portfolio Challenge focused on building real-world business analysis projects for data analyst roles.
 
 ---
+## Day 27 — Delivery Performance Analysis (Olist Ecommerce SQL Project)
+
+### Project Progress
+Today focused on ecommerce logistics and delivery performance analysis using PostgreSQL and the Olist dataset.
+
+### Skills Practiced
+- Delivery KPI analysis
+- Operational performance analysis
+- Ecommerce logistics analytics
+- State-level delivery comparison
+- Delivery trend reporting
+- SQL aggregation and ranking
+- Business insight generation
+
+### SQL Concepts Used
+- AVG()
+- COUNT()
+- CASE WHEN
+- FILTER
+- EXTRACT()
+- RANK()
+- CTEs
+- JOIN
+- Delivery date calculations
+
+### Business Questions Answered
+- How long does delivery usually take?
+- What percentage of deliveries are late?
+- Which states have the slowest delivery performance?
+- Which regions show stronger logistics efficiency?
+- How does delivery performance change over time?
+
+### Delivery Performance Metrics
+- Average delivery days
+- Late delivery rate
+- On-time vs late delivery comparison
+- State-level delivery ranking
+- Monthly delivery performance trends
+
+### Key Business Insights
+- Delivery performance is one of the most important operational KPIs in ecommerce.
+- Some customer regions experienced significantly slower delivery times.
+- Late delivery rates can negatively impact customer satisfaction and retention.
+- Geographic logistics performance varied across states.
+- Faster delivery regions may indicate stronger logistics infrastructure and operational efficiency.
+
+### Tools Used
+- PostgreSQL
+- pgAdmin
+- VS Code
+- Olist Brazil Ecommerce Dataset
+
+### Project Progres
+This project continues building a portfolio-ready ecommerce business intelligence workflow using SQL and PostgreSQL.
+
+---
 
 ## 📈 Key Learning Outcomes
 - Handling one-to-many relationships
