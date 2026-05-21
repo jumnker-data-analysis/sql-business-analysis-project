@@ -583,6 +583,68 @@ This project continues building a portfolio-ready ecommerce business intelligenc
 
 ---
 
+## Day 28 — Advanced Revenue Trend Analysis (Olist Ecommerce SQL Project)
+
+### Project Progress
+Today focused on advanced trend analysis and dashboard-style KPI reporting using PostgreSQL and the Olist ecommerce dataset.
+
+### Skills Practiced
+- Trend analysis
+- Revenue growth analysis
+- Dashboard-style SQL reporting
+- Window function analytics
+- Time-series business analysis
+- KPI trend reporting
+- Business intelligence workflow
+
+### SQL Concepts Used
+- SUM() OVER()
+- AVG() OVER()
+- LAG() OVER()
+- LEAD() OVER()
+- Running totals
+- Rolling averages
+- Window functions
+- CTEs
+- Month-over-month growth calculations
+
+### Business Questions Answered
+- How does revenue change month over month?
+- Which month had the strongest revenue growth?
+- Which month experienced the weakest performance?
+- What are the long-term revenue trends?
+- How can rolling averages smooth short-term fluctuations?
+- How can dashboard-style trend metrics support business decisions?
+
+### Trend Metrics Built
+- Monthly revenue
+- Running revenue
+- Previous month revenue
+- Next month revenue
+- Month-over-month growth %
+- Rolling 3-month average
+- Best growth month
+- Worst growth month
+
+### Key Business Insights
+- Revenue trends varied significantly across different months.
+- Running revenue analysis showed cumulative business growth over time.
+- Month-over-month growth analysis revealed both strong growth periods and weaker business cycles.
+- Rolling averages helped smooth short-term volatility and highlighted broader revenue patterns.
+- LEAD and LAG functions enabled easier comparison between historical and future business performance periods.
+- Trend analysis is essential for dashboard reporting and executive-level business intelligence.
+
+### Tools Used
+- PostgreSQL
+- pgAdmin
+- VS Code
+- Olist Brazil Ecommerce Dataset
+
+### Project Progres
+This stage focused on building dashboard-ready SQL outputs and advanced business intelligence reporting workflows.
+
+---
+
 ## 📈 Key Learning Outcomes
 - Handling one-to-many relationships
 - Avoiding aggregation errors

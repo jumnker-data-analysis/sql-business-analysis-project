@@ -659,4 +659,275 @@ order by order_month
 ----------------------------------------------------
 
 
+-- Day 28 
+----------------------------------------------------
+-- Step 1: Monthly Revenue Base table
+
+with monthly_revenue_tbl as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue,
+        count(distinct o.order_id) as total_orders
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by extract(month from o.order_purchase_timestamp)
+)
+select *
+from monthly_revenue_tbl
+order by order_month
+;
+
+----------------------------------------------------
+-- Step 2: Running revenue
+
+with monthly_revenue_tbl as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by extract(month from o.order_purchase_timestamp)
+)
+select
+    order_month,
+    monthly_revenue,
+    sum(monthly_revenue) over(order by order_month
+    rows between unbounded preceding and current row)
+    as running_revenue
+from monthly_revenue_tbl
+order by order_month
+;
+
+----------------------------------------------------
+-- Step 3: Previous Month Revenue using LAG() 
+
+with monthly_revenue_tbl as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by extract(month from o.order_purchase_timestamp)
+)
+select
+    order_month,
+    monthly_revenue,
+    lag(monthly_revenue) over(order by order_month) as previous_month_revenue
+from monthly_revenue_tbl
+order by order_month
+;
+
+
+----------------------------------------------------
+-- Step 4: Month-over-Month Revenue Growth 
+
+with monthly_revenue_tbl as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by extract(month from o.order_purchase_timestamp)
+),
+revenue_growth as(
+    select
+        order_month,
+        monthly_revenue,
+        lag(monthly_revenue) over(order by order_month) as previous_month_revenue
+    from monthly_revenue_tbl
+    order by order_month
+)
+select
+    order_month,
+    monthly_revenue,
+    previous_month_revenue,
+    round(
+        ((monthly_revenue - previous_month_revenue)
+        / nullif(previous_month_revenue,0)) * 100 , 2
+    ) as mom_growth_percent
+from revenue_growth
+order by order_month
+;
+
+----------------------------------------------------
+-- Step 5: Next Month Revenue using LEAD() 
+
+with monthly_revenue_tbl as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by extract(month from o.order_purchase_timestamp)
+)
+select
+    order_month,
+    monthly_revenue,
+    lead(monthly_revenue) over(order by order_month) as next_month_revenue
+from monthly_revenue_tbl
+order by order_month
+;
+
+
+----------------------------------------------------
+-- Step 6: Rolling 3-month average revenue
+
+with monthly_revenue_tbl as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by extract(month from o.order_purchase_timestamp)
+)
+select
+    order_month,
+    monthly_revenue,
+    round(
+        avg(monthly_revenue) over(order by order_month
+        rows between 2 preceding and current row)
+    )
+        as rolling_3_month_avg
+from monthly_revenue_tbl
+order by order_month
+;
+
+----------------------------------------------------
+-- Step 7: Best growth month
+
+with monthly_revenue_tbl as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by extract(month from o.order_purchase_timestamp)
+),
+growth_table as(
+    select
+        order_month,
+        monthly_revenue,
+        lag(monthly_revenue) over(order by order_month) as previous_month_revenue
+    from monthly_revenue_tbl
+),
+final_growth as(
+    select
+        order_month,
+        monthly_revenue,
+        previous_month_revenue,
+        round(
+            ((monthly_revenue - previous_month_revenue)
+            / nullif(previous_month_revenue,0)) * 100 , 2
+        ) as mom_growth_percent
+    from growth_table
+)
+select *
+from final_growth
+where mom_growth_percent is not null
+order by mom_growth_percent desc
+limit 1
+;
+
+----------------------------------------------------
+-- Step 8: Worst growth month
+
+with monthly_revenue_tbl as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by extract(month from o.order_purchase_timestamp)
+),
+growth_table as(
+    select
+        order_month,
+        monthly_revenue,
+        lag(monthly_revenue) over(order by order_month) as previous_month_revenue
+    from monthly_revenue_tbl
+),
+final_growth as(
+    select
+        order_month,
+        monthly_revenue,
+        previous_month_revenue,
+        round(
+            ((monthly_revenue - previous_month_revenue)
+            / nullif(previous_month_revenue,0)) * 100 , 2
+        ) as mom_growth_percent
+    from growth_table
+)
+select *
+from final_growth
+where mom_growth_percent is not null
+order by mom_growth_percent asc
+limit 1
+;
+
+----------------------------------------------------
+-- Step 9: Dashboard-ready trend table
+
+with monthly_revenue_tbl as (
+    select
+        extract(month from o.order_purchase_timestamp) as order_month,
+        round(sum(p.payment_value),2) as monthly_revenue,
+        count(distinct o.order_id) as total_orders
+    from orders o 
+    join order_payments p
+        on o.order_id = p.order_id
+    group by extract(month from o.order_purchase_timestamp)
+),
+trend_table as(
+    select
+        order_month,
+        monthly_revenue,
+        total_orders,
+        sum(monthly_revenue) over(order by order_month) as running_revenue,
+        lag(monthly_revenue) over(order by order_month) as previous_month_revenue,
+        lead(monthly_revenue) over(order by order_month) as next_month_revenue,
+        round(
+        avg(monthly_revenue) over(order by order_month
+        rows between 2 preceding and current row), 2
+        ) as rolling_3_month_avg
+    from monthly_revenue_tbl
+)
+select
+    order_month,
+    monthly_revenue,
+    total_orders,
+    running_revenue,
+    previous_month_revenue,
+    next_month_revenue,
+    round(
+        ((monthly_revenue - previous_month_revenue)
+        / nullif(previous_month_revenue,0)) * 100 , 2
+    ) as mom_growth_percent,
+    rolling_3_month_avg
+from trend_table
+order by order_month
+;
+
+----------------------------------------------------
+-- Day 28 Business Insights:
+-- 1. Monthly revenue trend analysis helps evaluate
+-- business momentum over time.
+-- 2. Running revenue shows cumulative business growth
+-- across months.
+-- 3. Month-over-month growth identifies strong and
+-- weak revenue periods.
+-- 4. Rolling averages help smooth short-term fluctuations
+-- and reveal longer-term patterns.
+-- 5. LEAD and LAG allow the business to compare past,
+-- current, and future periods in one query.
+-- 6. These trend metrics can support dashboard
+-- reporting and executive decision-making. 
+
 
