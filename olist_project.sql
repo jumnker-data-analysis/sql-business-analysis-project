@@ -931,3 +931,156 @@ order by order_month
 -- reporting and executive decision-making. 
 
 
+----------------------------------------------------
+-- Day 29 
+----------------------------------------------------
+-- Step 1: Pick 3 areas from previous analysis
+-- 1. Revenue trend
+-- 2. Customer segmentation
+-- 3. Delivery performance
+----------------------------------------------------
+-- Step 2: Insights Summary
+-- Insight 1: Revenue Trend
+-- Monthly revenue shows fluctuation across the analysis period.
+-- This suggests the business should monitor seasonal demand and growth consistency.
+
+-- Insight 2: Customer Segmentation
+-- Low-value customers generated the highest total revenue because of large customer volume.
+-- High-value customers had much higher average spending and should be targeted for retention.
+
+-- Insight 3: Delivery Performance
+-- Delivery performance was generally stable, with most orders delivered earlier than expected.
+-- However, late delivery rate should still be monitored because it can affect customer satisfaction.
+
+-- Insight 4: Business Opportunity
+-- Medium-value customers may represent a strong upselling opportunity.
+-- The business could use targeted campaigns to move medium-value customers into high-value segments.
+
+-- Insight 5: Dashboard Recommendation
+-- The final dashboard should include revenue KPIs, customer segments, delivery KPIs, and trend metrics.
+
+
+-- Step 3: Final insight table
+
+-- Monthly Revenue KPI
+SELECT
+EXTRACT(MONTH FROM o.order_purchase_timestamp) AS order_month,
+ROUND(SUM(p.payment_value), 2) AS monthly_revenue,
+COUNT(DISTINCT o.order_id) AS total_orders,
+ROUND(SUM(p.payment_value) / COUNT(DISTINCT o.order_id), 2) AS avg_order_value
+FROM orders o
+JOIN order_payments p
+ON o.order_id = p.order_id
+GROUP BY EXTRACT(MONTH FROM o.order_purchase_timestamp)
+ORDER BY order_month;
+
+-- Customer segment KPI
+WITH customer_spending AS (
+SELECT
+c.customer_unique_id,
+ROUND(SUM(p.payment_value), 2) AS total_spending
+FROM customers c
+JOIN orders o
+ON c.customer_id = o.customer_id
+JOIN order_payments p
+ON o.order_id = p.order_id
+GROUP BY c.customer_unique_id
+),
+
+customer_segment AS (
+SELECT
+customer_unique_id,
+total_spending,
+CASE
+WHEN total_spending >= 1000 THEN 'High Value'
+WHEN total_spending >= 300 THEN 'Medium Value'
+ELSE 'Low Value'
+END AS segment
+FROM customer_spending
+)
+
+SELECT
+segment,
+COUNT(*) AS total_customers,
+ROUND(SUM(total_spending), 2) AS segment_revenue,
+ROUND(AVG(total_spending), 2) AS avg_segment_revenue
+FROM customer_segment
+GROUP BY segment
+ORDER BY segment_revenue DESC;
+
+-- Delivery performance KPI
+SELECT
+EXTRACT(MONTH FROM order_purchase_timestamp) AS order_month,
+COUNT(*) AS delivered_orders,
+ROUND(
+AVG(EXTRACT(EPOCH FROM (order_delivered_customer_date - order_purchase_timestamp)) / 86400),
+2
+) AS avg_delivery_days,
+ROUND(
+COUNT(*) FILTER (
+WHERE order_delivered_customer_date > order_estimated_delivery_date
+) * 100.0 / COUNT(*),
+2
+) AS late_delivery_rate
+FROM orders
+WHERE order_status = 'delivered'
+AND order_delivered_customer_date IS NOT NULL
+AND order_estimated_delivery_date IS NOT NULL
+GROUP BY EXTRACT(MONTH FROM order_purchase_timestamp)
+ORDER BY order_month;
+
+-- State revenue KPI
+SELECT
+c.customer_state,
+COUNT(DISTINCT o.order_id) AS total_orders,
+ROUND(SUM(p.payment_value), 2) AS total_revenue,
+ROUND(SUM(p.payment_value) / COUNT(DISTINCT o.order_id), 2) AS avg_order_value
+FROM customers c
+JOIN orders o
+ON c.customer_id = o.customer_id
+JOIN order_payments p
+ON o.order_id = p.order_id
+GROUP BY c.customer_state
+ORDER BY total_revenue DESC;
+
+-- Dashboard summary KPI
+SELECT
+ROUND(SUM(p.payment_value), 2) AS total_revenue,
+COUNT(DISTINCT o.order_id) AS total_orders,
+COUNT(DISTINCT c.customer_unique_id) AS total_customers,
+ROUND(SUM(p.payment_value) / COUNT(DISTINCT o.order_id), 2) AS avg_order_value
+FROM orders o
+JOIN customers c
+ON o.customer_id = c.customer_id
+JOIN order_payments p
+ON o.order_id = p.order_id;
+select
+'Revenue Trend' as insight_area,
+'Monthly revenue analysis shows business performance changes over time.' as business_insight
+
+union all
+
+SELECT
+'Customer Segmentation',
+'Low-value customers drive total revenue volume, while high-value customers show strong retention potential.'
+
+UNION ALL
+
+SELECT
+'Delivery Performance',
+'Stable delivery performance supports customer experience, but late deliveries remain an operational risk.'
+
+UNION ALL
+
+SELECT
+'Business Recommendation',
+'Focus on retaining high-value customers and upselling medium-value customers.'
+
+UNION ALL
+
+select
+'Dashboard Recommendation',
+'The final dashboard should include revenue KPIs, customer segments, delivery KPIs, and trend metrics.'
+;
+
+

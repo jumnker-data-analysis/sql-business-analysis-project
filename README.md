@@ -645,6 +645,120 @@ This stage focused on building dashboard-ready SQL outputs and advanced business
 
 ---
 
+# Day 29 — KPI Export Preparation for Power BI
+
+## Project Focus
+Prepared dashboard-ready KPI tables using PostgreSQL for Power BI visualization and executive business reporting.
+
+---
+
+## Objectives
+- Transform raw e-commerce data into business-ready KPI outputs
+- Build reusable SQL queries for dashboard integration
+- Prepare CSV exports for Power BI visualization
+- Generate business insights from analytical results
+
+---
+
+# KPI Tables Created
+
+## 1. Monthly Revenue KPI
+Generated monthly revenue trends including:
+- Total revenue
+- Total orders
+- Average order value
+
+### Business Purpose
+Track overall business growth and seasonal performance trends.
+
+---
+
+## 2. Customer Segment KPI
+Built customer segmentation analysis:
+- High-value customers
+- Medium-value customers
+- Low-value customers
+
+### Business Purpose
+Support retention strategy and identify upselling opportunities.
+
+---
+
+## 3. Delivery Performance KPI
+Created operational delivery metrics:
+- Average delivery days
+- Late delivery rate
+- Delivered order volume
+
+### Business Purpose
+Monitor logistics performance and customer satisfaction risks.
+
+---
+
+## 4. State Revenue KPI
+Analyzed regional sales performance:
+- Revenue by customer state
+- Total orders by state
+- Average order value by region
+
+### Business Purpose
+Identify high-performing regions and support regional business strategy.
+
+---
+
+## 5. Dashboard Summary KPI
+Prepared executive KPI summary:
+- Total revenue
+- Total orders
+- Total customers
+- Average order value
+
+### Business Purpose
+Support executive dashboard overview and decision-making.
+
+---
+
+# CSV Export Workflow
+
+Exported all KPI tables as CSV files for Power BI dashboard integration.
+
+### Exported Files
+- monthly_revenue_kpi.csv
+- customer_segment_kpi.csv
+- delivery_performance_kpi.csv
+- state_revenue_kpi.csv
+- dashboard_summary_kpi.csv
+
+---
+
+# Key Business Insights
+
+- Revenue trends show fluctuations across the analysis period, indicating potential seasonality.
+- Low-value customers contribute the largest total revenue volume due to customer quantity.
+- High-value customers generate significantly higher average spending and represent strong retention opportunities.
+- Delivery performance remains relatively stable with manageable delay rates.
+- Regional sales analysis highlights concentration of revenue in selected states.
+
+---
+
+# Skills Practiced
+- PostgreSQL
+- CTEs
+- Aggregations
+- KPI reporting
+- Customer segmentation
+- Business analytics
+- CSV export workflow
+- Dashboard preparation
+- Business storytelling
+
+---
+
+# Next Step
+Build a Power BI executive dashboard using exported KPI tables.
+
+---
+
 ## 📈 Key Learning Outcomes
 - Handling one-to-many relationships
 - Avoiding aggregation errors
