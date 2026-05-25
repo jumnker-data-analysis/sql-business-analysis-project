@@ -759,6 +759,31 @@ Build a Power BI executive dashboard using exported KPI tables.
 
 ---
 
+## Day 30 — Power BI Dashboard & Portfolio Finalization
+
+### Project Progress
+Today focused on transforming SQL KPI outputs into a Power BI dashboard and finalizing the analytics project for portfolio presentation.
+
+### Dashboard Sections
+- Executive KPI Summary
+- Monthly Revenue Trend
+- Customer Segmentation
+- Delivery Performance
+- State Revenue Analysis
+
+### Tools Used
+- PostgreSQL
+- Power BI
+- CSV Export
+- GitHub
+
+### Key Learning
+This final step connected SQL analysis with business visualization.
+The project now demonstrates a complete analytics workflow from raw ecommerce data to dashboard-ready insights.
+
+
+---
+
 ## 📈 Key Learning Outcomes
 - Handling one-to-many relationships
 - Avoiding aggregation errors
