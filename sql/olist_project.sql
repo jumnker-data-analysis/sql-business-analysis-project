@@ -1053,7 +1053,10 @@ FROM orders o
 JOIN customers c
 ON o.customer_id = c.customer_id
 JOIN order_payments p
-ON o.order_id = p.order_id;
+ON o.order_id = p.order_id
+;
+
+-----------------------------------------
 select
 'Revenue Trend' as insight_area,
 'Monthly revenue analysis shows business performance changes over time.' as business_insight
