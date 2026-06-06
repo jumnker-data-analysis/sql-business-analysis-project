@@ -46,6 +46,28 @@ The dataset includes:
 
 ---
 
+## Executive Summary
+
+Analyzed 96,000+ ecommerce orders from Brazil.
+
+Built SQL workflows to identify:
+
+- Revenue trends
+- Customer segments
+- Delivery performance
+- State-level sales distribution
+
+Created dashboard-ready KPI datasets and a Power BI dashboard.
+
+Key findings:
+
+- São Paulo generated the highest revenue.
+- High-value customers represented only 1% of customers but generated 12% of revenue.
+- Delivery delays varied significantly across months.
+- Revenue concentrated in a small number of states.
+
+---
+
 ##  Progress 
 - ✅ Day 1-7 SQL fundamentals
 - ✅ Day 8-9 Subqueries & correlated queries
@@ -795,4 +817,4 @@ The project now demonstrates a complete analytics workflow from raw ecommerce da
 ## 📎 Author
 Yu-Jheng Su
 🔗 LinkedIn: www.linkedin.com/in/yujhengsu
-🔗 GitHub: https://github.com/jumnker-data-analysi
+🔗 GitHub: https://github.com/jumnker-data-analysis
